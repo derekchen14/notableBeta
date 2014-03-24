@@ -6,7 +6,14 @@
 #input-btn input {
 	margin: 10px 0;
 }
-
+ul.options {
+	list-style-type: none;
+	padding-left: 1.2em;
+	li { line-height: 1.4em; }
+	input {
+		margin-right: 4px;
+	}
+}
 #user-form {
 	width: 80%;
 	padding-left: 0;
@@ -49,6 +56,9 @@ span.help-block {
 // ---------------TABLET MEDIA QUERIES ----------------
 // ----------------------------------------------------
 @media (min-width: $screen-sm) {
+	.shortcut-hack {
+		display: none;
+	}
 	#user-form {
 		width: 60%;
 		.alert {
@@ -57,9 +67,16 @@ span.help-block {
 			position: static;
 			width: 100%;
 		}
+		form {
+			margin: 3% 0 10% 0;
+		}
 	}
 	.btn-submit {
 		width: inherit;
+		&.save-changes {
+			width: auto;
+			margin: 25px 0 40px 0;
+		}
 	}
 
 	#error_explanation {
@@ -72,15 +89,25 @@ span.help-block {
 // --------------LAPTOP MEDIA QUERIES -----------------
 // ----------------------------------------------------
 @media (min-width: $screen-md) {
+	.shortcut-hack {
+		display: inline;
+		margin-left: 2em;
+		color: $notableBlue;
+	}
 	#user-form {
 		max-width: 500px;
 		padding-left: 10%;
 		display: inline-block;
-
+		&.update-info {
+			padding-left: 0%;
+		}
 		.alert {
 			width: 100%;
 			.close { bottom: 0.1em; }
 		}
+	}
+	.cancel-text {
+		font-size: 0.9em;
 	}
 }
 
