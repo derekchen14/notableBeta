@@ -368,6 +368,7 @@ footer {
 			li:after { content: " | "; }
 			li:last-child:after {content: ""}
 		}
+		#shortcuts { padding: 14px; } // so you can click the links footer
 		#shortcuts > ul {
 			// display: block;
 			text-align: center;
