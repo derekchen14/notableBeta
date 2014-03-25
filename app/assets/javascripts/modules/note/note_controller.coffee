@@ -61,6 +61,7 @@
 			if _.isUndefined(App.linksRegion.currentView)
 				linksView = new App.Scaffold.LinksView
 				App.linksRegion.show linksView
+				App.User.settings.shortcutToolbar()
 		# Export Leaf
 		showExportView: (model, paragraph) ->
 			App.contentRegion.currentView.treeRegion.close()

@@ -129,6 +129,15 @@
 		id: "links-center"
 		tagName: "footer"
 
+		events: ->
+			"click .close-shortcuts": "closeShortcuts"
+
+		closeShortcuts: ->
+			options = App.User.settings.get()
+			options["shortcut"] = false
+			window.localStorage.setItem "settings", JSON.stringify(options)
+			$("#shortcuts").hide()
+
 	# Initializers -------------------------
 	App.Scaffold.on "start", ->
 		messageView = new App.Scaffold.MessageView

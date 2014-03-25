@@ -1,4 +1,5 @@
 @Notable.module "User", (User, App, Backbone, Marionette, $, _) ->
+	User.startWithParent = false
 
 		# Public -------------------------
 	User.Controller = Marionette.Controller.extend
