@@ -14,8 +14,9 @@
 			"click .sidebar-toggle": "shiftNavbar"
 			"click .new-note": "createNote"
 			"click .modview-btn": "applyModview"
-			"click .mindmap": "futureModview"
-			"click .grid": "futureModview"
+			"click .outline": "showOutline"
+			"click .mindmap": "showMindmap"
+			"click .grid": "showGrid"
 
 		createNote: ->
 			if App.Note.activeTree.models.length is 0
@@ -45,16 +46,28 @@
 			App.Note.eventManager.trigger "setCursor:#{App.Note.activeTree.last().get('guid')}"
 			App.Notify.alert 'newNote','success'
 			# mixpanel.track("New Note")
-		applyModview: (e) ->
-			type = App.Helper.ieShim.classList(e.currentTarget)[1]
-			$(".modview-btn").removeClass("selected")
-			$(".#{type}").addClass("selected")
-		futureModview: ->
-			alert("These Views are not yet operational.")
 		shiftNavbar: (e) ->
 			$(".navbar-header").toggleClass("navbar-shift")
 			$(".navbar-right").toggleClass("navbar-shift")
 			$(".sidebar-toggle").toggleClass("selected")
+
+		applyModview: (e) ->
+			type = App.Helper.ieShim.classList(e.currentTarget)[1]
+			$(".modview-btn").removeClass("selected")
+			$(".#{type}").addClass("selected")
+		showOutline: ->
+			App.contentRegion.currentView.treeRegion.close()
+			treeView = new App.Note.TreeView collection: App.Note.activeTree
+			App.contentRegion.currentView.treeRegion.show treeView
+			App.Notify.alert 'outlineModview','success',
+		showMindmap: ->
+			App.contentRegion.currentView.treeRegion.close()
+			App.contentRegion.currentView.crownRegion.close()
+			treeModview = new App.Note.TreeModview collection: App.Note.activeTree
+			App.contentRegion.currentView.treeRegion.show treeModview
+			App.Notify.alert 'mindmapModview','success'
+		showGrid: ->
+			App.Notify.alert 'gridModview','danger'
 
 	class Scaffold.ContentView extends Marionette.Layout
 		template: "scaffold/content"

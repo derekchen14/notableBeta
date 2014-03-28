@@ -10,6 +10,10 @@ $revealedWidth: 37px * $hiddenModviews;
 	display: none;
 }
 
+.branch.mindmap {
+	border: 1px solid red;
+}
+
 @media (max-width: $screen-sm) {
 }
 

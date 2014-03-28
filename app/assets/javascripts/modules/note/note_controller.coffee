@@ -79,11 +79,11 @@
 			App.contentRegion.currentView.treeRegion.close()
 			@treeView = new App.Note.TreeView collection: tree
 			App.contentRegion.currentView.treeRegion.show @treeView
+
 		showProgressView: () ->
 			App.contentRegion.currentView.treeRegion.close()
 			@treeView = new App.Helper.ProgressView()
 			App.contentRegion.currentView.treeRegion.show @treeView
-
 		showEvernoteView: ->
 			App.contentRegion.currentView.treeRegion.close()
 			@clearCrownView()

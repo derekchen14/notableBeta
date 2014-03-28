@@ -45,6 +45,11 @@
 		newNotebook: "A new notebook has been created!"
 		deleteNotebook: "Notebook deleted. <a class='undo-notebook-delete'> undo </a>"
 		preventNotebook: "Sorry, working with notebooks while offline is currently not possible."
+		# Modviews
+		outlineModview: "Outline view activated."
+		mindmapModview: "Mindmap view activated. <i>(still in active development)</i>"
+		gridModview: "Grid view is not yet operational."
+
 		# Import/Export
 		exceedPasting: "Pasting limit exceeded. Let us know if you really need to simultaneously paste more than 100 notes."
 		exportPlain: "Your notes are ready for export in plain text format."

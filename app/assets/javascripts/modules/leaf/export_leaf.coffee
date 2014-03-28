@@ -1,7 +1,7 @@
 @Notable.module "Leaf", (Leaf, App, Backbone, Marionette, $, _) ->
 	class Leaf.ExportView extends Marionette.ItemView
 		id: "tree"
-		template: "note/exportModel"
+		template: "leaf/export"
 
 		events: ->
 			"click .glyphicon-remove": "clearExport"

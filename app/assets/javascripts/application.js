@@ -38,4 +38,5 @@
 //= require_tree ./modules/helper
 //= require_tree ./modules/breadcrumb
 //= require_tree ./modules/leaf
+//= require_tree ./modules/modview
 //= require_tree ./modules/evernote
