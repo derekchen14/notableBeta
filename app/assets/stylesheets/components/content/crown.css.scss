@@ -54,6 +54,7 @@
 		#breadcrumb-region {
 			margin: 0 0.9em;
 			padding: 0.8em 15px;
+			&.modview { padding: 0; }
 		}
 
 		.breadcrumb {
@@ -141,6 +142,7 @@
 			font-size: 14px;
 			margin: 0 1em;
 			padding: 0.9em 16px;
+			&.modview { padding: 0; }
 		}
 		.breadcrumb {
 			left: 44.7%;

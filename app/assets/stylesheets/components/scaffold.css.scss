@@ -34,7 +34,10 @@ small {
 }
 .container {
 	padding: 0;
-
+	&.modview {
+		max-width: none;
+		width: 95%;
+	}
 	.alert {
 		margin: 0;
 		padding: 0.7em 1.2em 0.7em 1.4em;

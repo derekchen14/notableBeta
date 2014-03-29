@@ -11,12 +11,21 @@ $revealedWidth: 37px * $hiddenModviews;
 }
 
 .branch.mindmap {
-	border: 2px solid $grayDark;
-	max-width: 25em;
+	display: inline-block;
+	border-bottom: 2px solid $grayDark;
 	&.root {
+		border: 2px solid $grayDark;
 		border-radius: 7px;
 	}
 	// position: absolute;
+	.node-content {
+		margin: 0 0.5em;
+		display: inline-block;
+		outline: none;
+		z-index: 14;
+		position: relative;
+	}
+
 }
 
 @media (max-width: $screen-sm) {
@@ -50,6 +59,14 @@ $revealedWidth: 37px * $hiddenModviews;
 		// &:hover {
 		//  #hidden-modviews { width: $revealedWidth; }
 		// }
+	}
+
+	#notebook-title.modview {
+		position: absolute;
+		padding: 1em;
+		border: 2px solid $grayDark;
+		border-radius: 50%;
+		color: $black;
 	}
 
 }

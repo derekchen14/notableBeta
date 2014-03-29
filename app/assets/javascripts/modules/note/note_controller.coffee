@@ -37,6 +37,12 @@
 			Note.tree = @tree
 			Note.activeTree = @tree
 			Note.activeBranch = "root"
+			Note.mindmap =
+				height: 600
+				width: 0
+				side: "right"
+				titleTop: 0
+				titleLeft: 0
 		setEvents: ->
 			Note.eventManager.on "clearZoom", @clearZoom, @
 			Note.eventManager.on "render:export", @showExportView, @

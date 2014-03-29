@@ -57,17 +57,20 @@
 			$(".#{type}").addClass("selected")
 		showOutline: ->
 			App.contentRegion.currentView.treeRegion.close()
+			App.contentRegion.currentView.crownRegion.close()
 			treeView = new App.Note.TreeView collection: App.Note.activeTree
 			App.contentRegion.currentView.treeRegion.show treeView
 			App.Notify.alert 'outlineModview','success',
 		showMindmap: ->
 			App.contentRegion.currentView.treeRegion.close()
-			App.contentRegion.currentView.crownRegion.close()
 			treeModview = new App.Note.TreeModview collection: App.Note.activeTree
 			App.contentRegion.currentView.treeRegion.show treeModview
 			App.Notify.alert 'mindmapModview','success'
 		showGrid: ->
 			App.Notify.alert 'gridModview','danger'
+
+		# manangeLayout: ->
+		# 	$(".root.left").style
 
 	class Scaffold.ContentView extends Marionette.Layout
 		template: "scaffold/content"

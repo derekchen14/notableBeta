@@ -4,11 +4,11 @@
 		template: "modview/branch"
 		className: "branch-template"
 		ui:
-			noteContent: ">.branch .note-content"
+			nodeContent: ">.branch .node-content"
 			descendants: ">.branch .descendants"
 		events: ->
-			"blur >.branch>.note-content": "updateNote"
-			"keydown > .branch > .note-content": @model.timeoutAndSave
+			"blur >.branch>.node-content": "updateNote"
+			"keydown > .branch > .node-content": @model.timeoutAndSave
 
 		initialize: ->
 			@collection = @model.descendants
@@ -22,10 +22,21 @@
 		onRender: ->
 			@getNoteContent()
 			App.Note.eventManager.trigger "setCursor:#{@model.get('guid')}"
-			@$(">.branch").first().addClass('root') if @model.isARoot true
-			@setWidth()
-		appendHtml:(collectionView, itemView, i) ->
-			@$('.descendants:first').append(itemView.el)
+			window.setTimeout =>
+				@runCalculations()
+				@restyleBranches()
+				@restyleTree()
+			, 0
+		onClose: ->
+			@.$el.off()
+			$("#notebook-title").removeClass("modview")
+			$("#breadcrumb-region").removeClass("modview")
+			$(".container").removeClass("modview")
+			Note.eventManager.off "setCursor:#{@model.get('guid')}", @setCursor, @
+			Note.eventManager.off "render:#{@model.get('guid')}",  @render, @
+			Note.eventManager.off "setTitle:#{@model.get('guid')}", @setNoteTitle, @
+			Note.eventManager.off "timeoutUpdate:#{@model.get('guid')}", @updateNote, @
+			Note.eventManager.off "timeoutUpdate:#{@model.get('guid')}", @checkForLinks, @
 
 		bindKeyboardShortcuts: ->
 			@.$el.on 'keydown', null, 'return', @createNote.bind @
@@ -45,18 +56,46 @@
 			@.$el.on 'keydown', null, 'ctrl+s meta+s', @triggerSaving.bind @
 			@.$el.on 'keydown', null, 'ctrl+z meta+z', @triggerUndoEvent
 
-		setWidth: ->
-			foo = @model.attributes.title.length
-			bar = (foo*0.9).toFixed(1);
-			@el.style.width = bar+"em"
+		runCalculations: ->
+			Note.mindmap.height = @calculateHeight()
+			Note.mindmap.width = @calculateWidth()
+			Note.mindmap.titleTop = @calculateTitleTop() if Note.mindmap.titleTop is 0
+			Note.mindmap.titleLeft = @calculateTitleLeft() if Note.mindmap.titleLeft is 0
+		calculateHeight: ->
+			return 600
+		calculateWidth: ->
+			if "innerWidth" in window
+				return window.innerWidth*0.94
+			else
+				return document.documentElement.offsetWidth*0.94
+		calculateTitleTop: ->
+			fullTop = Note.mindmap.height - $("#notebook-title")[0].offsetHeight
+			(fullTop/2).toFixed(2)
+		calculateTitleLeft: ->
+			fullLeft = Note.mindmap.width - $("#notebook-title")[0].offsetWidth
+			(fullLeft/2).toFixed(2)
+		appendHtml:(collectionView, itemView, i) ->
+			@$('.descendants:first').append(itemView.el)
 
-		onClose: ->
-			@.$el.off()
-			Note.eventManager.off "setCursor:#{@model.get('guid')}", @setCursor, @
-			Note.eventManager.off "render:#{@model.get('guid')}",  @render, @
-			Note.eventManager.off "setTitle:#{@model.get('guid')}", @setNoteTitle, @
-			Note.eventManager.off "timeoutUpdate:#{@model.get('guid')}", @updateNote, @
-			Note.eventManager.off "timeoutUpdate:#{@model.get('guid')}", @checkForLinks, @
+		restyleTree: ->
+			$("#notebook-title").css
+				"top": Note.mindmap.titleTop+"px"
+				"left": Note.mindmap.titleLeft+"px"
+
+		restyleBranches: ->
+			@nodeWidth = @ui.nodeContent.width()
+			@rootSide = Note.mindmap.side
+			@setRoots() if @model.isARoot true
+		setRoots: ->
+			@$(">.branch").first().addClass('root')
+			Note.mindmap.side = if Note.mindmap.side is "left" then "right" else "left"
+			@positionRoots()
+		positionRoots: ->
+			xLeft = (Note.mindmap.width/2)-200-@nodeWidth
+			xRight = (Note.mindmap.width/2)+150
+			console.log "xLeft:", xLeft
+			@el.children[0].style.left = if @rootSide is "left" then xLeft+"px" else xRight+"px"
+
 		triggerRedoEvent: (e) ->
 			e.preventDefault()
 			e.stopPropagation()
@@ -133,9 +172,9 @@
 			title = @getNoteContent().html().trim()
 			App.Helper.tagRegex.trimEmptyTags title
 		getNoteContent: ->
-			if @ui.noteContent.length is 0 or !@ui.noteContent.focus?
-				@ui.noteContent = @.$('.note-content:first')
-			@ui.noteContent
+			if @ui.nodeContent.length is 0 or !@ui.nodeContent.focus?
+				@ui.nodeContent = @.$('.node-content:first')
+			@ui.nodeContent
 
 		setNoteTitle: (title, forceUpdate = false) ->
 			@getNoteContent().html title
@@ -165,7 +204,7 @@
 			@cursorApi[testPositionFunction](sel, title)
 
 	class Note.TreeModview extends Marionette.CollectionView
-		id: "tree"
+		id: "mindmap"
 		itemView: Note.BranchModview
 
 		initialize: ->
@@ -179,13 +218,12 @@
 			Note.eventManager.off 'change', @dispatchFunction, this
 			Note.eventManager.off 'renderTreeView', @render, this
 
-		onRender: -> @addDefaultNote false
-		addDefaultNote: (render = true) ->
-			# if @collection.length is 0 then @collection.create()
-			# @render if render
+		onRender: ->
+			$("#breadcrumb-region").addClass("modview")
+			$(".container").addClass("modview")
+			$("#notebook-title").addClass("modview")
+
 		dispatchFunction: (functionName, model) ->
-			# Hack to prevent the position of the cursor to be chained further
-			# down in the function stack
 			args = Note.sliceArgs(arguments)[0...-1] if _.last(arguments).cursorPosition?
 			if @[functionName]?
 				@[functionName].apply(@, Note.sliceArgs arguments)
