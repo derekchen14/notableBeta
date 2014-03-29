@@ -11,7 +11,12 @@ $revealedWidth: 37px * $hiddenModviews;
 }
 
 .branch.mindmap {
-	border: 1px solid red;
+	border: 2px solid $grayDark;
+	max-width: 25em;
+	&.root {
+		border-radius: 7px;
+	}
+	// position: absolute;
 }
 
 @media (max-width: $screen-sm) {

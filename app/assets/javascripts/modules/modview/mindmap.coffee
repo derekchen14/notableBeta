@@ -8,7 +8,6 @@
 			descendants: ">.branch .descendants"
 		events: ->
 			"blur >.branch>.note-content": "updateNote"
-			"click .destroy": @triggerEvent "deleteNote"
 			"keydown > .branch > .note-content": @model.timeoutAndSave
 
 		initialize: ->
@@ -22,22 +21,11 @@
 			@cursorApi = App.Helper.CursorPositionAPI
 		onRender: ->
 			@getNoteContent()
-			@trimExtraDropTarget()
 			App.Note.eventManager.trigger "setCursor:#{@model.get('guid')}"
-			@addRootStyling()
+			@$(">.branch").first().addClass('root') if @model.isARoot true
+			@setWidth()
 		appendHtml:(collectionView, itemView, i) ->
 			@$('.descendants:first').append(itemView.el)
-			if i is @collection.length - 1
-				@$('>.branch>.descendants>.branch-template>.branch>.dropAfter.dropTarget')[0...-1].remove()
-		trimExtraDropTarget: ->
-			if @model.isARoot(true) and @model.get('rank') isnt 1
-				@$(">.branch>.dropBefore").remove()
-		addRootStyling: ->
-			@$(">.branch").first().addClass('root') if @model.isARoot true
-
-		showVideo: (e) ->
-			bootbox.dialog "<iframe width='560' height='315' frameborder='0' src='http://www.youtube.com/embed/B1Iwz2x0Gow' allowfullscreen></iframe>"
-			e.stopPropagation()
 
 		bindKeyboardShortcuts: ->
 			@.$el.on 'keydown', null, 'return', @createNote.bind @
@@ -55,12 +43,12 @@
 			@.$el.on 'keydown', null, 'backspace', @mergeWithPreceding.bind @
 			@.$el.on 'keydown', null, 'del', @mergeWithFollowing.bind @
 			@.$el.on 'keydown', null, 'ctrl+s meta+s', @triggerSaving.bind @
-			# @.$el.on 'keydown', null, 'ctrl+y meta+y', @triggerRedoEvent
 			@.$el.on 'keydown', null, 'ctrl+z meta+z', @triggerUndoEvent
-			@.$el.on 'keydown', null, 'ctrl+b meta+b', @applyStyling.bind @, 'bold'
-			@.$el.on 'keydown', null, 'ctrl+i meta+i', @applyStyling.bind @, 'italic'
-			@.$el.on 'keydown', null, 'ctrl+u meta+u', @applyStyling.bind @, 'underline'
-			@.$el.on 'keydown', null, 'ctrl+k meta+k', @applyStyling.bind @, 'strikeThrough'
+
+		setWidth: ->
+			foo = @model.attributes.title.length
+			bar = (foo*0.9).toFixed(1);
+			@el.style.width = bar+"em"
 
 		onClose: ->
 			@.$el.off()
@@ -69,11 +57,6 @@
 			Note.eventManager.off "setTitle:#{@model.get('guid')}", @setNoteTitle, @
 			Note.eventManager.off "timeoutUpdate:#{@model.get('guid')}", @updateNote, @
 			Note.eventManager.off "timeoutUpdate:#{@model.get('guid')}", @checkForLinks, @
-		applyStyling: (style, e) ->
-			e.preventDefault()
-			e.stopPropagation()
-			App.User.idle = false # hideChrome only allowed when using keyboard shortcuts
-			document.execCommand(style)
 		triggerRedoEvent: (e) ->
 			e.preventDefault()
 			e.stopPropagation()
