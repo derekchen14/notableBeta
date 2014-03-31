@@ -13,6 +13,10 @@ $revealedWidth: 37px * $hiddenModviews;
 .branch.mindmap {
 	display: inline-block;
 	border-bottom: 2px solid $grayDark;
+	max-width: 25em;
+	position: absolute;
+	background-color: $white;
+	z-index: 12;
 	&.root {
 		border: 2px solid $grayDark;
 		border-radius: 7px;
@@ -26,6 +30,12 @@ $revealedWidth: 37px * $hiddenModviews;
 		position: relative;
 	}
 
+}
+
+canvas {
+	outline: 3px solid red;
+	position: absolute;
+	z-index: 10;
 }
 
 @media (max-width: $screen-sm) {
@@ -67,6 +77,8 @@ $revealedWidth: 37px * $hiddenModviews;
 		border: 2px solid $grayDark;
 		border-radius: 50%;
 		color: $black;
+		z-index: 18;
+		background-color: $white;
 	}
 
 }

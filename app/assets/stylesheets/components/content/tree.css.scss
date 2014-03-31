@@ -85,7 +85,10 @@
 			width: inherit;
 		}
 	}
-	#mindmap { margin: 1.8%; }
+	#mindmap {
+		margin: 1.8%;
+		position: relative;
+	}
 
 }
 
@@ -117,4 +120,8 @@
 	#tree, #progress-center, #ever-notebook {
 		min-height: 800px;
 	}
+}
+
+@media (min-width: 1300px) {
+	#mindmap { min-height: 750px; }
 }

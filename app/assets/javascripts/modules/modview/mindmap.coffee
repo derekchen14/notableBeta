@@ -24,19 +24,23 @@
 			App.Note.eventManager.trigger "setCursor:#{@model.get('guid')}"
 			window.setTimeout =>
 				@runCalculations()
-				@restyleBranches()
-				@restyleTree()
+				@positionTitle()
+				@positionNodes()
+				@positionRoots() if @model.isARoot true
 			, 0
 		onClose: ->
 			@.$el.off()
 			$("#notebook-title").removeClass("modview")
 			$("#breadcrumb-region").removeClass("modview")
 			$(".container").removeClass("modview")
+			$("canvas").remove()
 			Note.eventManager.off "setCursor:#{@model.get('guid')}", @setCursor, @
 			Note.eventManager.off "render:#{@model.get('guid')}",  @render, @
 			Note.eventManager.off "setTitle:#{@model.get('guid')}", @setNoteTitle, @
 			Note.eventManager.off "timeoutUpdate:#{@model.get('guid')}", @updateNote, @
 			Note.eventManager.off "timeoutUpdate:#{@model.get('guid')}", @checkForLinks, @
+		appendHtml:(collectionView, itemView, i) ->
+			@$('.descendants:first').append(itemView.el)
 
 		bindKeyboardShortcuts: ->
 			@.$el.on 'keydown', null, 'return', @createNote.bind @
@@ -57,44 +61,51 @@
 			@.$el.on 'keydown', null, 'ctrl+z meta+z', @triggerUndoEvent
 
 		runCalculations: ->
-			Note.mindmap.height = @calculateHeight()
-			Note.mindmap.width = @calculateWidth()
+			Note.mindmap.height = @calculateHeight() if Note.mindmap.height is 0
+			Note.mindmap.width = @calculateWidth() if Note.mindmap.width is 0
 			Note.mindmap.titleTop = @calculateTitleTop() if Note.mindmap.titleTop is 0
 			Note.mindmap.titleLeft = @calculateTitleLeft() if Note.mindmap.titleLeft is 0
 		calculateHeight: ->
-			return 600
+			if "innerWidth" in window
+				if window.innerHeight < 1300 then 600 else 800
+			else
+				if document.documentElement.offsetWidth < 1300 then 600 else 800
 		calculateWidth: ->
 			if "innerWidth" in window
 				return window.innerWidth*0.94
 			else
 				return document.documentElement.offsetWidth*0.94
 		calculateTitleTop: ->
-			fullTop = Note.mindmap.height - $("#notebook-title")[0].offsetHeight
+			fullTop = $("#content-center").height() - $("#notebook-title")[0].offsetHeight
 			(fullTop/2).toFixed(2)
 		calculateTitleLeft: ->
 			fullLeft = Note.mindmap.width - $("#notebook-title")[0].offsetWidth
 			(fullLeft/2).toFixed(2)
-		appendHtml:(collectionView, itemView, i) ->
-			@$('.descendants:first').append(itemView.el)
 
-		restyleTree: ->
+		positionTitle: ->
 			$("#notebook-title").css
 				"top": Note.mindmap.titleTop+"px"
 				"left": Note.mindmap.titleLeft+"px"
-
-		restyleBranches: ->
-			@nodeWidth = @ui.nodeContent.width()
-			@rootSide = Note.mindmap.side
-			@setRoots() if @model.isARoot true
-		setRoots: ->
-			@$(">.branch").first().addClass('root')
-			Note.mindmap.side = if Note.mindmap.side is "left" then "right" else "left"
-			@positionRoots()
+		positionNodes: ->
+			@nodeWidth = @el.children[0].offsetWidth
+			@nodeHeight = @el.children[0].offsetHeight
 		positionRoots: ->
-			xLeft = (Note.mindmap.width/2)-200-@nodeWidth
-			xRight = (Note.mindmap.width/2)+150
-			console.log "xLeft:", xLeft
-			@el.children[0].style.left = if @rootSide is "left" then xLeft+"px" else xRight+"px"
+			@rootSide = Note.mindmap.side
+			@$(">.branch").first().addClass('root')
+			@$(">.branch").first().addClass(@rootSide)
+			Note.mindmap.side = if Note.mindmap.side is "left" then "right" else "left"
+			@rootVertical()
+			@rootHorizontal()
+
+		rootVertical: ->
+			if @rootSide is "right"
+				Note.mindmap.stackRight.push @
+			else
+				Note.mindmap.stackLeft.push @
+		rootHorizontal: ->
+			left = (Note.mindmap.width/2)-200-@nodeWidth
+			right = (Note.mindmap.width/2)+150
+			@el.children[0].style.left = if @rootSide is "left" then left+"px" else right+"px"
 
 		triggerRedoEvent: (e) ->
 			e.preventDefault()
@@ -158,7 +169,6 @@
 			App.Action.orchestrator.triggerSaving()
 		updateNote: (forceUpdate = false) ->
 			noteTitle = @getNoteTitle()
-			noteSubtitle = "" #@getNoteSubtitle()
 			if @model.get('title') isnt noteTitle or forceUpdate is true
 				noteTitle = @checkForLinks()
 				App.Action.orchestrator.triggerAction 'updateBranch', @model,
@@ -208,6 +218,7 @@
 		itemView: Note.BranchModview
 
 		initialize: ->
+			@setGlobals()
 			@listenTo @collection, "sort", @render
 			@listenTo @collection, "destroy", @addDefaultNote
 			Note.eventManager.on 'createNote', @createNote, this
@@ -222,6 +233,190 @@
 			$("#breadcrumb-region").addClass("modview")
 			$(".container").addClass("modview")
 			$("#notebook-title").addClass("modview")
+			window.setTimeout =>
+				@calculateStack(Note.mindmap.stackRight)
+				@calculateStack(Note.mindmap.stackLeft)
+				@positionConnectors(2, 3, 4)
+			, 0
+		setGlobals: ->
+			Note.mindmap =
+				height: 0
+				width: 0
+				side: "right"
+				titleTop: 0
+				titleLeft: 0
+				stackLeft: []
+				stackRight: []
+
+		calculateStack: (stack) ->
+			if stack.length > 1
+				stackHeight = @stackHeight(stack)
+				totalHeight = stackHeight*1.4
+				gap = (0.4*stackHeight)/(stack.length-1)
+			else if stack.length is 1
+				totalHeight = stack[0].nodeHeight
+			else if stack.length is 0
+				return
+			@positionStack(stack, gap, totalHeight)
+		positionStack: (stack, gap, totalHeight) ->
+			offset = (Note.mindmap.height-totalHeight)/2
+			branchCount = 0
+			branches = @findBranchSide(stack, gap, totalHeight)
+			for branch in branches
+				# console.log branch
+				branch.style.top = offset+"px"
+				offset += stack[branchCount].nodeHeight
+				offset += gap
+				branchCount++
+		stackHeight: (stack) ->
+			stackHeight = 0
+			for h in stack
+				stackHeight += h.nodeHeight
+			return stackHeight
+		findBranchSide: (stack, gap, totalHeight) ->
+			if stack is Note.mindmap.stackRight
+				@totalHeight = totalHeight
+				@gapRight = gap
+				return $(".branch.right")
+			else
+				@totalHeightLeft = totalHeight
+				@gapLeft = gap
+				return $(".branch.left")
+
+		positionConnectors: (item, side, children) ->
+			canvas = @createCanvas()
+			@drawLime(canvas, Note.mindmap.stackRight)
+			@drawEggplant(canvas, Note.mindmap.stackRight)
+			@drawBox(canvas, Note.mindmap.stackRight)
+			@drawAvocado(canvas, Note.mindmap.stackLeft)
+			@drawOrange(canvas, Note.mindmap.stackLeft)
+			# @drawConnectors(canvas, Note.mindmap.stackRight)
+			# @drawConnectors(canvas, Note.mindmap.stackLeft)
+			@positionCanvas(canvas)
+		createCanvas: ->
+			canvas = document.createElement("canvas")
+			canvas.width = 400
+			canvas.height = @totalHeight
+			return canvas
+		drawLime: (canvas, stack) ->
+			x1 = (canvas.width/2)-2
+			y1 = (@totalHeight/2)-2
+			x2 = canvas.width
+			y2 = Note.mindmap.stackRight[0].nodeHeight/2
+			x3 = x1+3
+			y3 = y1+3
+
+			ctx = canvas.getContext("2d")
+			ctx.fillStyle = "#14A4FF"
+			ctx.strokeStyle = "#14A4FF"
+			ctx.beginPath()
+			ctx.moveTo x1, y1
+			ctx.quadraticCurveTo 280, 25, x2, y2
+			ctx.quadraticCurveTo 280, 25, x3, y3
+			ctx.fill()
+			ctx.stroke()
+		drawEggplant: (canvas, stack) ->
+			x1 = (canvas.width/2)-2
+			y1 = (@totalHeight/2)-2
+			x2 = canvas.width
+			y2 = Note.mindmap.stackRight[1].nodeHeight/2+Note.mindmap.stackRight[0].nodeHeight+@gapRight
+			x3 = x1+3
+			y3 = y1+3
+
+			ctx = canvas.getContext("2d")
+			ctx.fillStyle = "#14A4FF"
+			ctx.strokeStyle = "#14A4FF"
+			ctx.beginPath()
+			ctx.moveTo x1, y1
+			ctx.quadraticCurveTo 280, 70, x2, y2
+			ctx.quadraticCurveTo 280, 70, x3, y3
+			ctx.fill()
+			ctx.stroke()
+		drawBox: (canvas, stack) ->
+			x1 = (canvas.width/2)-2
+			y1 = (@totalHeight/2)-2
+			x2 = canvas.width
+			y2 = (Note.mindmap.stackRight[2].nodeHeight/2)+(2*@gapRight)
+			y2 = y2+Note.mindmap.stackRight[0].nodeHeight+Note.mindmap.stackRight[1].nodeHeight
+			x3 = x1+3
+			y3 = y1+3
+
+			ctx = canvas.getContext("2d")
+			ctx.fillStyle = "#14A4FF"
+			ctx.strokeStyle = "#14A4FF"
+			ctx.beginPath()
+			ctx.moveTo x1, y1
+			ctx.quadraticCurveTo 280, 95, x2, y2
+			ctx.quadraticCurveTo 280, 95, x3, y3
+			ctx.fill()
+			ctx.stroke()
+		drawOrange: (canvas, stack) ->
+			totalHeightgap = (@totalHeight - @totalHeightLeft)/2
+
+			x1 = (canvas.width/2)-2
+			y1 = (@totalHeight/2)-2
+			x2 = 0
+			y2 = Note.mindmap.stackLeft[0].nodeHeight/2+totalHeightgap
+			x3 = x1+3
+			y3 = y1+3
+
+			ctx = canvas.getContext("2d")
+			ctx.fillStyle = "#14A4FF"
+			ctx.strokeStyle = "#14A4FF"
+			ctx.beginPath()
+			ctx.moveTo x1, y1
+			ctx.quadraticCurveTo 120, 38, x2, y2
+			ctx.quadraticCurveTo 120, 38, x3, y3
+			ctx.fill()
+			ctx.stroke()
+		drawAvocado: (canvas, stack) ->
+			totalHeightgap = (@totalHeight - @totalHeightLeft)/2
+
+			x1 = (canvas.width/2)-2
+			y1 = (@totalHeight/2)-2
+			x2 = 0
+			y2 = Note.mindmap.stackRight[1].nodeHeight/2+@gapLeft+Note.mindmap.stackRight[0].nodeHeight
+			y2 = y2+totalHeightgap
+			x3 = x1+3
+			y3 = y1+3
+
+			ctx = canvas.getContext("2d")
+			ctx.fillStyle = "#14A4FF"
+			ctx.strokeStyle = "#14A4FF"
+			ctx.beginPath()
+			ctx.moveTo x1, y1
+			ctx.quadraticCurveTo 120, 95, x2, y2
+			ctx.quadraticCurveTo 120, 95, x3, y3
+			ctx.fill()
+			ctx.stroke()
+
+	# var x2 = this._getChildAnchor(child, side);
+	# var y2 = child.getShape().getVerticalAnchor(child) + child.getDOM().node.offsetTop;
+	# ctx.quadraticCurveTo (x2 + x1) / 2, y2, x2, y2
+	# ctx.quadraticCurveTo (x2 + x1) / 2, y2, x1 + dx, y1 + dy
+		positionCanvas: (canvas) ->
+			canvasTop = ($("#content-center").height() - canvas.height)/2
+			canvasLeft = (Note.mindmap.width - canvas.width)/2
+			canvas.style.top = canvasTop+"px"
+			canvas.style.left = canvasLeft+"px"
+			$("#breadcrumb-region").append(canvas)
+
+		drawLeftConnectors: (canvas) ->
+			while i < children.length
+				child = children[i]
+				x2 = @_getChildAnchor(child, side)
+				y2 = child.getShape().getVerticalAnchor(child) + child.getDOM().node.offsetTop
+				angle = Math.atan2(y2 - y1, x2 - x1) + Math.PI / 2
+				dx = Math.cos(angle) * half
+				dy = Math.sin(angle) * half
+				ctx.fillStyle = ctx.strokeStyle = child.getColor()
+				ctx.beginPath()
+				ctx.moveTo x1 - dx, y1 - dy
+				ctx.quadraticCurveTo (x2 + x1) / 2, y2, x2, y2
+				ctx.quadraticCurveTo (x2 + x1) / 2, y2, x1 + dx, y1 + dy
+				ctx.fill()
+				ctx.stroke()
+				i++
 
 		dispatchFunction: (functionName, model) ->
 			args = Note.sliceArgs(arguments)[0...-1] if _.last(arguments).cursorPosition?
@@ -257,18 +452,3 @@
 			else
 				Note.eventManager.trigger "setCursor:#{note.get('guid')}", true
 				false
-
-		leafTipBefore: (dropType, e) ->
-			bullet = e.currentTarget.nextElementSibling.nextElementSibling
-			$(bullet).addClass(dropType)
-			$(e.delegateTarget).addClass("before")
-			if e.delegateTarget.previousElementSibling
-				bulletAfter = e.delegateTarget.previousElementSibling.children[0].children[2]
-				$(bulletAfter).addClass("dropAfter")
-		leafTipAfter: (dropType, e) ->
-			bullet = e.currentTarget.previousElementSibling.previousElementSibling
-			$(bullet).addClass(dropType)
-			$(e.delegateTarget).addClass("after")
-			if e.delegateTarget.nextElementSibling
-				bulletBefore = e.delegateTarget.nextElementSibling.children[0].children[1]
-				$(bulletBefore).addClass("dropBefore")

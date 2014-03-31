@@ -69,9 +69,6 @@
 		showGrid: ->
 			App.Notify.alert 'gridModview','danger'
 
-		# manangeLayout: ->
-		# 	$(".root.left").style
-
 	class Scaffold.ContentView extends Marionette.Layout
 		template: "scaffold/content"
 		id: "content-center"
