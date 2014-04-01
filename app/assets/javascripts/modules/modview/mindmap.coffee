@@ -263,160 +263,93 @@
 			branchCount = 0
 			branches = @findBranchSide(stack, gap, totalHeight)
 			for branch in branches
-				# console.log branch
 				branch.style.top = offset+"px"
 				offset += stack[branchCount].nodeHeight
 				offset += gap
 				branchCount++
 		stackHeight: (stack) ->
-			stackHeight = 0
-			for h in stack
-				stackHeight += h.nodeHeight
-			return stackHeight
+			stack.reduce (total, item) ->
+				total + item.nodeHeight
+			, 0
 		findBranchSide: (stack, gap, totalHeight) ->
-			if stack is Note.mindmap.stackRight
+			if stack[0].rootSide is "right"
 				@totalHeight = totalHeight
 				@gapRight = gap
 				return $(".branch.right")
-			else
-				@totalHeightLeft = totalHeight
+			else if stack[0].rootSide is "left"
+				@heightGap = (@totalHeight - totalHeight)/2
 				@gapLeft = gap
 				return $(".branch.left")
 
 		positionConnectors: (item, side, children) ->
 			canvas = @createCanvas()
-			@drawLime(canvas, Note.mindmap.stackRight)
-			@drawEggplant(canvas, Note.mindmap.stackRight)
-			@drawBox(canvas, Note.mindmap.stackRight)
-			@drawAvocado(canvas, Note.mindmap.stackLeft)
-			@drawOrange(canvas, Note.mindmap.stackLeft)
-			# @drawConnectors(canvas, Note.mindmap.stackRight)
-			# @drawConnectors(canvas, Note.mindmap.stackLeft)
+			@drawConnectors(canvas, Note.mindmap.stackRight)
+			@drawConnectors(canvas, Note.mindmap.stackLeft)
 			@positionCanvas(canvas)
 		createCanvas: ->
 			canvas = document.createElement("canvas")
 			canvas.width = 400
 			canvas.height = @totalHeight
 			return canvas
-		drawLime: (canvas, stack) ->
-			x1 = (canvas.width/2)-2
-			y1 = (@totalHeight/2)-2
-			x2 = canvas.width
-			y2 = Note.mindmap.stackRight[0].nodeHeight/2
-			x3 = x1+3
-			y3 = y1+3
+		drawConnectors: (canvas, stack) ->
+			xStart = (canvas.width/2)
+			yStart = (@totalHeight/2)-3
+			xPoints = @findXPoints(canvas, stack)
+			yPoints = @findYPoints(stack)
+			xControls = @findXControls(stack)
+			yControls = @findYControls(yPoints)
+			xEnd = xStart
+			yEnd = (@totalHeight/2)+2
 
-			ctx = canvas.getContext("2d")
-			ctx.fillStyle = "#14A4FF"
-			ctx.strokeStyle = "#14A4FF"
-			ctx.beginPath()
-			ctx.moveTo x1, y1
-			ctx.quadraticCurveTo 280, 25, x2, y2
-			ctx.quadraticCurveTo 280, 25, x3, y3
-			ctx.fill()
-			ctx.stroke()
-		drawEggplant: (canvas, stack) ->
-			x1 = (canvas.width/2)-2
-			y1 = (@totalHeight/2)-2
-			x2 = canvas.width
-			y2 = Note.mindmap.stackRight[1].nodeHeight/2+Note.mindmap.stackRight[0].nodeHeight+@gapRight
-			x3 = x1+3
-			y3 = y1+3
-
-			ctx = canvas.getContext("2d")
-			ctx.fillStyle = "#14A4FF"
-			ctx.strokeStyle = "#14A4FF"
-			ctx.beginPath()
-			ctx.moveTo x1, y1
-			ctx.quadraticCurveTo 280, 70, x2, y2
-			ctx.quadraticCurveTo 280, 70, x3, y3
-			ctx.fill()
-			ctx.stroke()
-		drawBox: (canvas, stack) ->
-			x1 = (canvas.width/2)-2
-			y1 = (@totalHeight/2)-2
-			x2 = canvas.width
-			y2 = (Note.mindmap.stackRight[2].nodeHeight/2)+(2*@gapRight)
-			y2 = y2+Note.mindmap.stackRight[0].nodeHeight+Note.mindmap.stackRight[1].nodeHeight
-			x3 = x1+3
-			y3 = y1+3
-
-			ctx = canvas.getContext("2d")
-			ctx.fillStyle = "#14A4FF"
-			ctx.strokeStyle = "#14A4FF"
-			ctx.beginPath()
-			ctx.moveTo x1, y1
-			ctx.quadraticCurveTo 280, 95, x2, y2
-			ctx.quadraticCurveTo 280, 95, x3, y3
-			ctx.fill()
-			ctx.stroke()
-		drawOrange: (canvas, stack) ->
-			totalHeightgap = (@totalHeight - @totalHeightLeft)/2
-
-			x1 = (canvas.width/2)-2
-			y1 = (@totalHeight/2)-2
-			x2 = 0
-			y2 = Note.mindmap.stackLeft[0].nodeHeight/2+totalHeightgap
-			x3 = x1+3
-			y3 = y1+3
-
-			ctx = canvas.getContext("2d")
-			ctx.fillStyle = "#14A4FF"
-			ctx.strokeStyle = "#14A4FF"
-			ctx.beginPath()
-			ctx.moveTo x1, y1
-			ctx.quadraticCurveTo 120, 38, x2, y2
-			ctx.quadraticCurveTo 120, 38, x3, y3
-			ctx.fill()
-			ctx.stroke()
-		drawAvocado: (canvas, stack) ->
-			totalHeightgap = (@totalHeight - @totalHeightLeft)/2
-
-			x1 = (canvas.width/2)-2
-			y1 = (@totalHeight/2)-2
-			x2 = 0
-			y2 = Note.mindmap.stackRight[1].nodeHeight/2+@gapLeft+Note.mindmap.stackRight[0].nodeHeight
-			y2 = y2+totalHeightgap
-			x3 = x1+3
-			y3 = y1+3
-
-			ctx = canvas.getContext("2d")
-			ctx.fillStyle = "#14A4FF"
-			ctx.strokeStyle = "#14A4FF"
-			ctx.beginPath()
-			ctx.moveTo x1, y1
-			ctx.quadraticCurveTo 120, 95, x2, y2
-			ctx.quadraticCurveTo 120, 95, x3, y3
-			ctx.fill()
-			ctx.stroke()
-
-	# var x2 = this._getChildAnchor(child, side);
-	# var y2 = child.getShape().getVerticalAnchor(child) + child.getDOM().node.offsetTop;
-	# ctx.quadraticCurveTo (x2 + x1) / 2, y2, x2, y2
-	# ctx.quadraticCurveTo (x2 + x1) / 2, y2, x1 + dx, y1 + dy
+			for connector in stack
+				# console.log "yStart:",Math.round(yStart)," yControl:",Math.round(yControls[_i])," yPoint",Math.round(yPoints[_i])," yEnd:",Math.round(yEnd)
+				# console.log "xStart:",Math.round(xStart)," xControl:",Math.round(xControls)," xPoint",xPoints," xEnd:",Math.round(xEnd)
+				ctx = canvas.getContext("2d")
+				ctx.fillStyle = ctx.strokeStyle = "#14A4FF"
+				ctx.beginPath()
+				ctx.moveTo xStart, yStart
+				ctx.quadraticCurveTo xControls, yControls[_i], xPoints, yPoints[_i]
+				ctx.quadraticCurveTo xControls, yControls[_i], xEnd, yEnd
+				ctx.fill()
+				ctx.stroke()
+		findXPoints: (canvas, stack) ->
+			if stack[0].rootSide is "right" then canvas.width else 0
+		findYPoints: (stack) ->
+			yPoints = []; i = 0
+			yPrevious = if stack[0].rootSide is "right" then 0 else @heightGap
+			do rec = (stack, yPrevious) =>
+				yPoint = yPrevious + stack[i].nodeHeight/2
+				yPoints.push yPoint
+				yPrevious += stack[i].nodeHeight + @findGap(stack)
+				i++; return false if stack.length is i
+				rec stack, yPrevious
+			return yPoints
+		findGap: (stack) ->
+			if stack[0].rootSide is "right" then @gapRight else @gapLeft
+		findXControls: (stack) ->
+			if stack[0].rootSide is "right" then 280 else 120
+		findYControls: (yPoints) ->
+			yControls = []; shift = 0.9
+			yMidpoint = @totalHeight/2
+			for point in yPoints
+				if Math.round(yMidpoint) > Math.round(point)
+					upshift = (yMidpoint-point)*shift
+					yControl = yMidpoint-upshift
+				else if Math.round(yMidpoint) < Math.round(point)
+					downshift = (point-yMidpoint)*shift
+					yControl = yMidpoint+downshift
+				else # node midpoint is the same height as the title midpoint
+					random = (Math.random()-0.5)*4
+					randomShift = if random>0 then 10+random else -10+random
+					yControl = yMidpoint+randomShift
+				yControls.push yControl
+			return yControls
 		positionCanvas: (canvas) ->
 			canvasTop = ($("#content-center").height() - canvas.height)/2
 			canvasLeft = (Note.mindmap.width - canvas.width)/2
 			canvas.style.top = canvasTop+"px"
 			canvas.style.left = canvasLeft+"px"
 			$("#breadcrumb-region").append(canvas)
-
-		drawLeftConnectors: (canvas) ->
-			while i < children.length
-				child = children[i]
-				x2 = @_getChildAnchor(child, side)
-				y2 = child.getShape().getVerticalAnchor(child) + child.getDOM().node.offsetTop
-				angle = Math.atan2(y2 - y1, x2 - x1) + Math.PI / 2
-				dx = Math.cos(angle) * half
-				dy = Math.sin(angle) * half
-				ctx.fillStyle = ctx.strokeStyle = child.getColor()
-				ctx.beginPath()
-				ctx.moveTo x1 - dx, y1 - dy
-				ctx.quadraticCurveTo (x2 + x1) / 2, y2, x2, y2
-				ctx.quadraticCurveTo (x2 + x1) / 2, y2, x1 + dx, y1 + dy
-				ctx.fill()
-				ctx.stroke()
-				i++
 
 		dispatchFunction: (functionName, model) ->
 			args = Note.sliceArgs(arguments)[0...-1] if _.last(arguments).cursorPosition?
