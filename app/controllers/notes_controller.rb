@@ -15,6 +15,8 @@ class NotesController < ApplicationController
   def create
     @note = Note.new(params[:note])
     if @note.save
+      incr = getWords(@note.title)
+      add_to_library(incr)
       render json: @note, status: :created, location: @note
     else
       render json: @note.errors, status: :unprocessable_entity
@@ -23,7 +25,10 @@ class NotesController < ApplicationController
 
   def update
     @note = Note.find(params[:id])
+    currentWords = getWords(@note.title)
     if @note.update_attributes(params[:note])
+      newWords = getWords(@note.title)
+      getWordDiff(newWords, currentWords)
       head :no_content
     else
       render json: @note.errors, status: :unprocessable_entity
@@ -32,6 +37,8 @@ class NotesController < ApplicationController
 
   def destroy
     @note = Note.find(params[:id])
+    decr = getWords(@note.title)
+    remove_from_library(decr)
 		if @note.parent_id == 'root' and @note.eng?
 			@note.update_attributes(:trashed => true)
 		else
@@ -53,6 +60,32 @@ class NotesController < ApplicationController
       format.js { render json: @notes }
     end
   end
+
+  private
+    def getWords(note)
+      content = note.gsub(/&nbsp;|\?|\!|\.|,/, ' ')
+      newWords = content.gsub(/\s+/, ' ').strip.split(" ")
+      newWords.delete_if { |word| word.match /\W/ }
+      newWords.delete_if { |word| word.length < 6 }
+    end
+
+    def getWordDiff(newWords, currentWords)
+      return if newWords == currentWords
+      incr = newWords - currentWords
+      decr = currentWords - newWords
+      add_to_library(incr) unless incr.empty?
+      remove_from_library(decr) unless decr.empty?
+    end
+
+    def add_to_library(words)
+      words.each { |word| puts "incr Notebook:#{@note.notebook_id}:#{word}" }
+    # words.each { |word| $redis.incr "Notebook:#{@note.notebook_id}:#{word}" }
+    end
+
+    def remove_from_library(words)
+      words.each { |word| puts "decr Notebook:#{@note.notebook_id}:#{word}" }
+    # words.each { |word| $redis.decr "Notebook:#{@note.notebook_id}:#{word}" }
+    end
 
 end
 
