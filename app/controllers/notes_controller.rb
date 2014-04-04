@@ -16,6 +16,7 @@ class NotesController < ApplicationController
     @note = Note.new(params[:note])
     if @note.save
       incr = getWords(@note.title)
+      puts "incr: #{incr}"
       add_to_library(incr)
       render json: @note, status: :created, location: @note
     else
@@ -67,6 +68,7 @@ class NotesController < ApplicationController
       newWords = content.gsub(/\s+/, ' ').strip.split(" ")
       newWords.delete_if { |word| word.match /\W/ }
       newWords.delete_if { |word| word.length < 6 }
+      return newWords
     end
 
     def getWordDiff(newWords, currentWords)
@@ -78,13 +80,11 @@ class NotesController < ApplicationController
     end
 
     def add_to_library(words)
-      words.each { |word| puts "incr Notebook:#{@note.notebook_id}:#{word}" }
-    # words.each { |word| $redis.incr "Notebook:#{@note.notebook_id}:#{word}" }
+      words.each { |word| $redis.hincrby "Notebook:#{@note.notebook_id}", word, 1 }
     end
 
     def remove_from_library(words)
-      words.each { |word| puts "decr Notebook:#{@note.notebook_id}:#{word}" }
-    # words.each { |word| $redis.decr "Notebook:#{@note.notebook_id}:#{word}" }
+      words.each { |word| $redis.hincrby "Notebook:#{@note.notebook_id}", word, -1 }
     end
 
 end
