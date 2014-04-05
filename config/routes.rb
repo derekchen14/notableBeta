@@ -3,6 +3,7 @@ Notable::Application.routes.draw do
 
   resources :notes
   resources :notebooks
+  resources :suggestions
 
 	devise_scope :user do
 		get "active_user" => "users/sessions#index"

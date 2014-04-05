@@ -1,12 +1,14 @@
-class WordsController < ApplicationController
+class SuggestionsController < ApplicationController
   respond_to :html, :json
 
   def index
-    notebooks = User.get_used_trunks
+    notebooks = current_user.get_used_trunks
     @suggestions = []
     notebooks.each do |notebook|
       words = $redis.hgetall "Notebook:#{notebook.id}"
-      words.each { |word, count| @suggestions << word if count.to_i > 3 }
+      words.each do |word, count|
+        @suggestions << {suggestion: word} if count.to_i > 3
+      end
     end
     respond_with @suggestions # send to bloodhound
   end

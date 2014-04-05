@@ -17,8 +17,8 @@
 		App.module("Action").start()
 		App.module("Notebook").start()
 		App.module("Note").start()
+		App.module("Leaf").start()
 		App.module("Notify").start()
-		# App.module("Leaf").start()
 		# App.module("Modview").start()
 		# App.module("Tag").start()
 
