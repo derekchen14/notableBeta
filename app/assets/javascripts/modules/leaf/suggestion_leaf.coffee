@@ -3,30 +3,31 @@
 
 	App.Leaf =
 		start: ->
-			@engine = @startBloodhound()
-			@bloodhoundPromise
-				.done( => @startTypeAhead(@engine) )
-				.fail( -> console.log('Error with Bloodhound') )
-		startBloodhound: ->
+			App.Notebook.initializedTrunk.then =>
+				notebook_id = App.Notebook.activeTrunk.id
+				@startBloodhound(notebook_id)
+		startBloodhound: (id) ->
 			engine = new Bloodhound
-				# name: 'suggestions'
 				limit: 5
 				local: [{suggestion: "Notable"}]
-				prefetch: 'suggestions.json'
-				# remote: 'suggestions.json'
+				prefetch: '/suggestions.json'
+				remote: 'suggestions/'+id+'.json?q=%QUERY'
+				dupDetector: (remote, local) ->
+					remote.suggestion is local.suggestion
 				datumTokenizer: (d) ->
 					Bloodhound.tokenizers.whitespace(d.suggestion)
 				queryTokenizer: Bloodhound.tokenizers.whitespace
 			engine.clear()
 			engine.clearPrefetchCache()
-			@bloodhoundPromise = engine.initialize(true)
-			return engine
+			bloodhoundInitialized = engine.initialize(true)
+			bloodhoundInitialized
+				.done( => @startTypeAhead(engine) )
+				.fail( -> console.log('Error with Bloodhound') )
 		startTypeAhead: (engine) ->
 			$("#query").typeahead
 				minLength: 3
 				highlight: true
 			,
-				# name: "suggestions"
+				name: "suggestions"
 				displayKey: "suggestion"
 				source: engine.ttAdapter()
-

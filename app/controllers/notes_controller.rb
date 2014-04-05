@@ -72,9 +72,12 @@ class NotesController < ApplicationController
     end
 
     def getWordDiff(newWords, currentWords)
+      puts "newWords: #{newWords}"
+      puts "currentWords: #{currentWords}"
       return if newWords == currentWords
       incr = newWords - currentWords
       decr = currentWords - newWords
+      puts "incr: #{incr}"
       add_to_library(incr) unless incr.empty?
       remove_from_library(decr) unless decr.empty?
     end
