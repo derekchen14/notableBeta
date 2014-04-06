@@ -1465,26 +1465,35 @@
                 this.dropdown.empty();
                 this.dropdown.close();
             },
-            _onEnterKeyed: function onEnterKeyed(type, $e) {
-                var cursorDatum, topSuggestionDatum;
-                cursorDatum = this.dropdown.getDatumForCursor();
-                topSuggestionDatum = this.dropdown.getDatumForTopSuggestion();
+            _onTabKeyed: function onTabKeyed(type, $e) {
+                var cursorDatum = this.dropdown.getDatumForCursor();
                 if (cursorDatum) {
                     this._select(cursorDatum);
-                    $e.preventDefault();
-                } else if (this.autoselect && topSuggestionDatum) {
-                    this._select(topSuggestionDatum);
-                    $e.preventDefault();
-                }
-            },
-            _onTabKeyed: function onTabKeyed(type, $e) {
-                var datum;
-                if (datum = this.dropdown.getDatumForCursor()) {
-                    this._select(datum);
                     $e.preventDefault();
                 } else {
                     this._autocomplete(true);
                 }
+            },
+            _onEnterKeyed: function onEnterKeyed(type, $e) {
+                var cursorDatum = this.dropdown.getDatumForCursor();
+                if (cursorDatum) {
+                    this._select(cursorDatum);
+                    $e.preventDefault();
+                } else {
+                    this._autocomplete(true);
+                }
+                // var cursorDatum, topSuggestionDatum;
+                // cursorDatum = this.dropdown.getDatumForCursor();
+                // topSuggestionDatum = this.dropdown.getDatumForTopSuggestion();
+                // console.log("cursorDatum:",cursorDatum);
+                // console.log("topSuggestionDatum:",topSuggestionDatum);
+                // if (cursorDatum) {
+                //     this._select(cursorDatum);
+                //     $e.preventDefault();
+                // } else if (this.autoselect && topSuggestionDatum) {
+                //     this._select(topSuggestionDatum);
+                //     $e.preventDefault();
+                // }
             },
             _onEscKeyed: function onEscKeyed() {
                 this.dropdown.close();
