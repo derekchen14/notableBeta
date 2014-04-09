@@ -8,11 +8,12 @@ html {
 }
 body {
 	height: 100%;
-	background-image: asset-url('satinweave.png', image);
+	// background-image: asset-url('satinweave.png', image);
+	background-color: black;
 	font: 12px Tahoma, Helvetica, Arial, sans-serif;
 	letter-spacing: 0.4px;
 	line-height: 1.4em;
-	color: $black;
+	color: $grayDark;
 	margin: 0 auto;
 	padding: 0;
 	-webkit-transition-property: background;

@@ -24,7 +24,7 @@
 				.done( => @startTypeAhead(engine) )
 				.fail( -> console.log('Error with Bloodhound') )
 		startTypeAhead: (engine) ->
-			$("#query").typeahead
+			$(".note-content").typeahead
 				minLength: 3
 				highlight: true
 			,

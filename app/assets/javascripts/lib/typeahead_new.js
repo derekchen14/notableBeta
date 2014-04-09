@@ -691,7 +691,6 @@
     var css = {
         wrapper: {
             position: "relative",
-            display: "inline-block"
         },
         hint: {
             position: "absolute",
@@ -726,14 +725,14 @@
         suggestionChild: {
             whiteSpace: "normal"
         },
-        ltr: {
-            left: "0",
-            right: "auto"
-        },
-        rtl: {
-            left: "auto",
-            right: " 0"
-        }
+        // ltr: {
+        //     left: "0",
+        //     right: "auto"
+        // },
+        // rtl: {
+        //     left: "auto",
+        //     right: " 0"
+        // }
     };
     if (_.isMsie()) {
         _.mixin(css.input, {
@@ -906,8 +905,8 @@
         specialKeyCodeMap = {
             9: "tab",
             27: "esc",
-            37: "left",
-            39: "right",
+            // 37: "left",
+            // 39: "right",
             13: "enter",
             38: "up",
             40: "down"
@@ -930,14 +929,14 @@
             if (!_.isMsie()) {
                 this.$input.on("input.tt", onInput);
             } else {
-                this.$input.on("keydown.tt keypress.tt cut.tt paste.tt", function($e) {
+                this.$input.on("keydown.tt keypress.tt", function($e) {           //#changed
                     if (specialKeyCodeMap[$e.which || $e.keyCode]) {
                         return;
                     }
                     _.defer(_.bind(that._onInput, that, $e));
                 });
             }
-            this.query = this.$input.val();
+            this.query = this.$input.html().trim();       // #changed
             this.$overflowHelper = buildOverflowHelper(this.$input);
         }
         Input.normalizeQuery = function(str) {
@@ -995,6 +994,7 @@
             _checkInputValue: function checkInputValue() {
                 var inputValue, areEquivalent, hasDifferentWhitespace;
                 inputValue = this.getInputValue();
+                // console.log("Part 1: ", this.query);
                 areEquivalent = areQueriesEquivalent(inputValue, this.query);
                 hasDifferentWhitespace = areEquivalent ? this.query.length !== inputValue.length : false;
                 if (!areEquivalent) {
@@ -1016,20 +1016,20 @@
                 this.query = query;
             },
             getInputValue: function getInputValue() {
-                return this.$input.val();
+                return this.$input.html().trim();           // #changed
             },
             setInputValue: function setInputValue(value, silent) {
-                this.$input.val(value);
+                this.$input.html(value);                    // #changed
                 silent ? this.clearHint() : this._checkInputValue();
             },
             resetInputValue: function resetInputValue() {
                 this.setInputValue(this.query, true);
             },
             getHint: function getHint() {
-                return this.$hint.val();
+                return this.$hint.html().trim();            // #changed
             },
             setHint: function setHint(value) {
-                this.$hint.val(value);
+                this.$hint.html(value);                     // #changed
             },
             clearHint: function clearHint() {
                 this.setHint("");
@@ -1042,9 +1042,9 @@
                 isValid = val !== "" && valIsPrefixOfHint && !this.hasOverflow();
                 !isValid && this.clearHint();
             },
-            getLanguageDirection: function getLanguageDirection() {
-                return (this.$input.css("direction") || "ltr").toLowerCase();
-            },
+            // getLanguageDirection: function getLanguageDirection() {
+            //     return (this.$input.css("direction") || "ltr").toLowerCase();
+            // },
             hasOverflow: function hasOverflow() {
                 var constraint = this.$input.width() - 2;
                 this.$overflowHelper.text(this.getInputValue());
@@ -1052,7 +1052,7 @@
             },
             isCursorAtEnd: function() {
                 var valueLength, selectionStart, range;
-                valueLength = this.$input.val().length;
+                valueLength = this.$input.html().length;                // #changed
                 selectionStart = this.$input[0].selectionStart;
                 if (_.isNumber(selectionStart)) {
                     return selectionStart === valueLength;
@@ -1127,6 +1127,7 @@
                 if (!this.$el) {
                     return;
                 }
+                // suggestions.push("prepare");                // #changed
                 var that = this, hasSuggestions;
                 this.$el.empty();
                 hasSuggestions = suggestions && suggestions.length;
@@ -1153,6 +1154,7 @@
                     });
                     return $suggestions;
                     function getSuggestionNode(suggestion) {
+                        // console.log("Suggestion:", suggestion);
                         var $el;
                         $el = $(html.suggestion).append(that.templates.suggestion(suggestion)).data(datasetKey, that.name).data(valueKey, that.displayFn(suggestion)).data(datumKey, suggestion);
                         $el.children().each(function() {
@@ -1184,6 +1186,7 @@
                 this.source(query, render);
                 function render(suggestions) {
                     if (!that.canceled && query === that.query) {
+                        // console.log("Part 4:", query);
                         that._render(query, suggestions);
                     }
                 }
@@ -1228,6 +1231,7 @@
     }();
     var Dropdown = function() {
         function Dropdown(o) {
+            console.log("Dropdown");
             var that = this, onSuggestionClick, onSuggestionMouseEnter, onSuggestionMouseLeave;
             o = o || {};
             if (!o.menu) {
@@ -1236,6 +1240,7 @@
             this.isOpen = false;
             this.isEmpty = true;
             this.datasets = _.map(o.datasets, initializeDataset);
+            // console.log("Datasets:", o.datasets);
             onSuggestionClick = _.bind(this._onSuggestionClick, this);
             onSuggestionMouseEnter = _.bind(this._onSuggestionMouseEnter, this);
             onSuggestionMouseLeave = _.bind(this._onSuggestionMouseLeave, this);
@@ -1329,9 +1334,9 @@
                     this.trigger("opened");
                 }
             },
-            setLanguageDirection: function setLanguageDirection(dir) {
-                this.$menu.css(dir === "ltr" ? css.ltr : css.rtl);
-            },
+            // setLanguageDirection: function setLanguageDirection(dir) {
+            //     this.$menu.css(dir === "ltr" ? css.ltr : css.rtl);
+            // },
             moveCursorUp: function moveCursorUp() {
                 this._moveCursor(-1);
             },
@@ -1389,6 +1394,7 @@
         var attrsKey = "ttAttrs";
         function Typeahead(o) {
             var $menu, $input, $hint;
+            console.log("Typeahead");
             o = o || {};
             if (!o.input) {
                 $.error("missing input");
@@ -1426,8 +1432,9 @@
             this.input = new Input({
                 input: $input,
                 hint: $hint
-            }).onSync("focused", this._onFocused, this).onSync("blurred", this._onBlurred, this).onSync("enterKeyed", this._onEnterKeyed, this).onSync("tabKeyed", this._onTabKeyed, this).onSync("escKeyed", this._onEscKeyed, this).onSync("upKeyed", this._onUpKeyed, this).onSync("downKeyed", this._onDownKeyed, this).onSync("leftKeyed", this._onLeftKeyed, this).onSync("rightKeyed", this._onRightKeyed, this).onSync("queryChanged", this._onQueryChanged, this).onSync("whitespaceChanged", this._onWhitespaceChanged, this);
-            this._setLanguageDirection();
+            }).onSync("focused", this._onFocused, this).onSync("blurred", this._onBlurred, this).onSync("enterKeyed", this._onEnterKeyed, this).onSync("tabKeyed", this._onTabKeyed, this).onSync("escKeyed", this._onEscKeyed, this).onSync("upKeyed", this._onUpKeyed, this).onSync("downKeyed", this._onDownKeyed, this).onSync("queryChanged", this._onQueryChanged, this).onSync("whitespaceChanged", this._onWhitespaceChanged, this);
+            // .onSync("leftKeyed", this._onLeftKeyed, this).onSync("rightKeyed", this._onRightKeyed, this)
+            // this._setLanguageDirection();
         }
         _.mixin(Typeahead.prototype, {
             _onSuggestionClicked: function onSuggestionClicked(type, $el) {
@@ -1476,10 +1483,14 @@
             },
             _onEnterKeyed: function onEnterKeyed(type, $e) {
                 var cursorDatum = this.dropdown.getDatumForCursor();
+                console.log("Typeahead");
                 if (cursorDatum) {
                     this._select(cursorDatum);
                     $e.preventDefault();
                 } else {
+                    $e.preventDefault();
+                    // $e.stopPropagation();
+                    // $e.stopImmediatePropagation();
                     this._autocomplete(true);
                 }
                 // var cursorDatum, topSuggestionDatum;
@@ -1509,30 +1520,30 @@
                 this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorDown();
                 this.dropdown.open();
             },
-            _onLeftKeyed: function onLeftKeyed() {
-                this.dir === "rtl" && this._autocomplete();
-            },
-            _onRightKeyed: function onRightKeyed() {
-                this.dir === "ltr" && this._autocomplete();
-            },
+            // _onLeftKeyed: function onLeftKeyed() {
+            //     this.dir === "rtl" && this._autocomplete();
+            // },
+            // _onRightKeyed: function onRightKeyed() {
+            //     this.dir === "ltr" && this._autocomplete();
+            // },
             _onQueryChanged: function onQueryChanged(e, query) {
                 this.input.clearHintIfInvalid();
                 query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.empty();
                 this.dropdown.open();
-                this._setLanguageDirection();
+                // this._setLanguageDirection();
             },
             _onWhitespaceChanged: function onWhitespaceChanged() {
                 this._updateHint();
                 this.dropdown.open();
             },
-            _setLanguageDirection: function setLanguageDirection() {
-                var dir;
-                if (this.dir !== (dir = this.input.getLanguageDirection())) {
-                    this.dir = dir;
-                    this.$node.css("direction", dir);
-                    this.dropdown.setLanguageDirection(dir);
-                }
-            },
+            // _setLanguageDirection: function setLanguageDirection() {
+            //     var dir;
+            //     if (this.dir !== (dir = this.input.getLanguageDirection())) {
+            //         this.dir = dir;
+            //         this.$node.css("direction", dir);
+            //         this.dropdown.setLanguageDirection(dir);
+            //     }
+            // },
             _updateHint: function updateHint() {
                 var datum, val, query, escapedQuery, frontMatchRegEx, match;
                 datum = this.dropdown.getDatumForTopSuggestion();
@@ -1561,7 +1572,7 @@
             _select: function select(datum) {
                 this.input.setQuery(datum.value);
                 this.input.setInputValue(datum.value, true);
-                this._setLanguageDirection();
+                // this._setLanguageDirection();
                 this.eventBus.trigger("selected", datum.raw, datum.datasetName);
                 this.dropdown.close();
                 _.defer(_.bind(this.dropdown.empty, this.dropdown));
@@ -1579,7 +1590,7 @@
                     this.input.setQuery(val);
                     this.input.setInputValue(val, true);
                 }
-                this._setLanguageDirection();
+                // this._setLanguageDirection();
             },
             getVal: function getVal() {
                 return this.input.getQuery();
@@ -1598,8 +1609,8 @@
             $wrapper = $(html.wrapper).css(css.wrapper);
             $dropdown = $(html.dropdown).css(css.dropdown);
             $hint = $input.clone().css(css.hint).css(getBackgroundStyles($input));
-            $hint.val("").removeData().addClass("tt-hint").removeAttr("id name placeholder").prop("disabled", true).attr({
-                autocomplete: "off",
+            $hint.html("").removeData().addClass("tt-hint").removeAttr("id name placeholder").prop("disabled", true).attr({
+                autocomplete: "off",     // #changed
                 spellcheck: "false"
             });
             $input.data(attrsKey, {
