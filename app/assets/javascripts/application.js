@@ -20,7 +20,7 @@
 //= require lib/modernizr
 //= require lib/idle
 //= require lib/bootbox
-//= require lib/typeahead
+//= require lib/typeahead_old
 //= require handlebars
 //= require bootstrap
 //
