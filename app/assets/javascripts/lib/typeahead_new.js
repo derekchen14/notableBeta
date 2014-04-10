@@ -1231,7 +1231,6 @@
     }();
     var Dropdown = function() {
         function Dropdown(o) {
-            console.log("Dropdown");
             var that = this, onSuggestionClick, onSuggestionMouseEnter, onSuggestionMouseLeave;
             o = o || {};
             if (!o.menu) {
@@ -1288,7 +1287,7 @@
             _removeCursor: function removeCursor() {
                 this._getCursor().removeClass("tt-cursor");
             },
-            _moveCursor: function moveCursor(increment) {
+            _moveCursor: function moveCursor(increment, event) {
                 var $suggestions, $oldCursor, newCursorIndex, $newCursor;
                 if (!this.isOpen) {
                     return;
@@ -1306,6 +1305,9 @@
                 }
                 this._setCursor($newCursor = $suggestions.eq(newCursorIndex));
                 this._ensureVisible($newCursor);
+                // console.log(event);
+                event.preventDefault();
+                event.stopPropagation();
             },
             _ensureVisible: function ensureVisible($el) {
                 var elTop, elBottom, menuScrollTop, menuHeight;
@@ -1337,11 +1339,11 @@
             // setLanguageDirection: function setLanguageDirection(dir) {
             //     this.$menu.css(dir === "ltr" ? css.ltr : css.rtl);
             // },
-            moveCursorUp: function moveCursorUp() {
-                this._moveCursor(-1);
+            moveCursorUp: function moveCursorUp(e) {
+                this._moveCursor(-1, e);
             },
-            moveCursorDown: function moveCursorDown() {
-                this._moveCursor(+1);
+            moveCursorDown: function moveCursorDown(e) {
+                this._moveCursor(+1, e);
             },
             getDatumForSuggestion: function getDatumForSuggestion($el) {
                 var datum = null;
@@ -1394,7 +1396,6 @@
         var attrsKey = "ttAttrs";
         function Typeahead(o) {
             var $menu, $input, $hint;
-            console.log("Typeahead");
             o = o || {};
             if (!o.input) {
                 $.error("missing input");
@@ -1473,77 +1474,38 @@
                 this.dropdown.close();
             },
             _onTabKeyed: function onTabKeyed(type, $e) {
-                var cursorDatum = this.dropdown.getDatumForCursor();
-                if (cursorDatum) {
-                    this._select(cursorDatum);
-                    $e.preventDefault();
-                } else {
-                    this._autocomplete(true);
-                }
+                var cursorDatum = this.dropdown.getDatumForCursor(); // if cursor is on a suggestion
+                // grab the suggestion that the user selected and autocomplete the word with the suggestion
+                // otherwise, if the cursor is already on a hint, autocomplete the word with that hint
+                cursorDatum ? this._select(cursorDatum, $e) : this._autocomplete(true, $e);
             },
             _onEnterKeyed: function onEnterKeyed(type, $e) {
                 var cursorDatum = this.dropdown.getDatumForCursor();
-                console.log("Typeahead");
-                if (cursorDatum) {
-                    this._select(cursorDatum);
-                    $e.preventDefault();
-                } else {
-                    $e.preventDefault();
-                    // $e.stopPropagation();
-                    // $e.stopImmediatePropagation();
-                    this._autocomplete(true);
-                }
-                // var cursorDatum, topSuggestionDatum;
-                // cursorDatum = this.dropdown.getDatumForCursor();
-                // topSuggestionDatum = this.dropdown.getDatumForTopSuggestion();
-                // console.log("cursorDatum:",cursorDatum);
-                // console.log("topSuggestionDatum:",topSuggestionDatum);
-                // if (cursorDatum) {
-                //     this._select(cursorDatum);
-                //     $e.preventDefault();
-                // } else if (this.autoselect && topSuggestionDatum) {
-                //     this._select(topSuggestionDatum);
-                //     $e.preventDefault();
-                // }
+                cursorDatum ? this._select(cursorDatum, $e) : this._autocomplete(true, $e);
             },
             _onEscKeyed: function onEscKeyed() {
                 this.dropdown.close();
                 this.input.resetInputValue();
             },
-            _onUpKeyed: function onUpKeyed() {
+            _onUpKeyed: function onUpKeyed(type, $e) {
                 var query = this.input.getQuery();
-                this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorUp();
+                this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorUp($e);
                 this.dropdown.open();
             },
-            _onDownKeyed: function onDownKeyed() {
+            _onDownKeyed: function onDownKeyed(type, $e) {
                 var query = this.input.getQuery();
-                this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorDown();
+                this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorDown($e);
                 this.dropdown.open();
             },
-            // _onLeftKeyed: function onLeftKeyed() {
-            //     this.dir === "rtl" && this._autocomplete();
-            // },
-            // _onRightKeyed: function onRightKeyed() {
-            //     this.dir === "ltr" && this._autocomplete();
-            // },
             _onQueryChanged: function onQueryChanged(e, query) {
                 this.input.clearHintIfInvalid();
                 query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.empty();
                 this.dropdown.open();
-                // this._setLanguageDirection();
             },
             _onWhitespaceChanged: function onWhitespaceChanged() {
                 this._updateHint();
                 this.dropdown.open();
             },
-            // _setLanguageDirection: function setLanguageDirection() {
-            //     var dir;
-            //     if (this.dir !== (dir = this.input.getLanguageDirection())) {
-            //         this.dir = dir;
-            //         this.$node.css("direction", dir);
-            //         this.dropdown.setLanguageDirection(dir);
-            //     }
-            // },
             _updateHint: function updateHint() {
                 var datum, val, query, escapedQuery, frontMatchRegEx, match;
                 datum = this.dropdown.getDatumForTopSuggestion();
@@ -1558,24 +1520,30 @@
                     this.input.clearHint();
                 }
             },
-            _autocomplete: function autocomplete(laxCursor) {
+            _autocomplete: function autocomplete(laxCursor, event) {
                 var hint, query, isCursorAtEnd, datum;
-                hint = this.input.getHint();
-                query = this.input.getQuery();
+                hint = this.input.getHint();     // "prepare"
+                query = this.input.getQuery();   //  "pre"
                 isCursorAtEnd = laxCursor || this.input.isCursorAtEnd();
                 if (hint && query !== hint && isCursorAtEnd) {
                     datum = this.dropdown.getDatumForTopSuggestion();
-                    datum && this.input.setInputValue(datum.value);
+                    datum && this.input.setInputValue(datum.value); // double ampersand will check if "datum" exists
+                    // if datum is undefined, then the && operand will return false and everything exits
+                    // otherwise the second part is evaluated, meaning the word is autocompleted with the "datum.value"
                     this.eventBus.trigger("autocompleted", datum.raw, datum.datasetName);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    // $e.stopImmediatePropagation();
                 }
             },
-            _select: function select(datum) {
-                this.input.setQuery(datum.value);
-                this.input.setInputValue(datum.value, true);
-                // this._setLanguageDirection();
+            _select: function select(datum, e) {
+                this.input.setQuery(datum.value);     // possibly empty the query, since it should now be a new word
+                this.input.setInputValue(datum.value, true);    // add a space here
                 this.eventBus.trigger("selected", datum.raw, datum.datasetName);
                 this.dropdown.close();
                 _.defer(_.bind(this.dropdown.empty, this.dropdown));
+                e && e.preventDefault();
+                e && e.stopPropagation();
             },
             open: function open() {
                 this.dropdown.open();
