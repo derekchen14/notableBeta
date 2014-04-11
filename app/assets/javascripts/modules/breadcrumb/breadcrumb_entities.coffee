@@ -7,7 +7,7 @@
 				@set "route", route
 			else
 				@set "route", "#/#{branch.get('guid')}"
-			@set "title", branch.get('title')
+			@set "title", @getBranchTitle(branch)
 			@set "depth", branch.get('depth')
 
 			if @get("depth") is -1
@@ -15,6 +15,12 @@
 
 		updateNotebookTitle: ->
 			@set "title", App.Notebook.activeTrunk.get("title")
+		getBranchTitle: (branch) ->
+			title = branch.get('title')
+			if title.length > 14 and branch.id > 0
+				return title.slice(0,14).concat("..")
+			else
+				return title
 
 	class Note.Breadcrumbs extends Backbone.Collection
 		model: Note.Breadcrumb
