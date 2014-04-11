@@ -689,16 +689,6 @@
         suggestion: '<div class="tt-suggestion"></div>'
     };
     var css = {
-        wrapper: {
-            position: "relative",
-        },
-        hint: {
-            position: "absolute",
-            top: "0",
-            left: "0",
-            borderColor: "transparent",
-            boxShadow: "none"
-        },
         input: {
             position: "relative",
             verticalAlign: "top",
@@ -708,16 +698,6 @@
             position: "relative",
             verticalAlign: "top"
         },
-        dropdown: {
-            position: "absolute",
-            top: "100%",
-            left: "0",
-            zIndex: "100",
-            display: "none"
-        },
-        suggestions: {
-            display: "block"
-        },
         suggestion: {
             whiteSpace: "nowrap",
             cursor: "pointer"
@@ -725,14 +705,7 @@
         suggestionChild: {
             whiteSpace: "normal"
         },
-        // ltr: {
-        //     left: "0",
-        //     right: "auto"
-        // },
-        // rtl: {
-        //     left: "auto",
-        //     right: " 0"
-        // }
+
     };
     if (_.isMsie()) {
         _.mixin(css.input, {
@@ -905,8 +878,6 @@
         specialKeyCodeMap = {
             9: "tab",
             27: "esc",
-            // 37: "left",
-            // 39: "right",
             13: "enter",
             38: "up",
             40: "down"
@@ -936,17 +907,19 @@
                     _.defer(_.bind(that._onInput, that, $e));
                 });
             }
-            this.query = this.$input.html().trim();       // #changed
+            this.query = this.getInputValue();       // this sets the initial query value, has nothing to do with keydown
             this.$overflowHelper = buildOverflowHelper(this.$input);
         }
         Input.normalizeQuery = function(str) {
+            // trim any leading spaces
+            // replace any multiple spaces into one space
             return (str || "").replace(/^\s*/g, "").replace(/\s{2,}/g, " ");
         };
         _.mixin(Input.prototype, EventEmitter, {
-            _onBlur: function onBlur() {
-                this.resetInputValue();
-                this.trigger("blurred");
-            },
+            // _onBlur: function onBlur() {
+            //     this.resetInputValue();
+            //     this.trigger("blurred");
+            // },
             _onFocus: function onFocus() {
                 this.trigger("focused");
             },
@@ -994,7 +967,6 @@
             _checkInputValue: function checkInputValue() {
                 var inputValue, areEquivalent, hasDifferentWhitespace;
                 inputValue = this.getInputValue();
-                // console.log("Part 1: ", this.query);
                 areEquivalent = areQueriesEquivalent(inputValue, this.query);
                 hasDifferentWhitespace = areEquivalent ? this.query.length !== inputValue.length : false;
                 if (!areEquivalent) {
@@ -1145,7 +1117,7 @@
                 }
                 function getSuggestionsHtml() {
                     var $suggestions, nodes;
-                    $suggestions = $(html.suggestions).css(css.suggestions);
+                    $suggestions = $(html.suggestions);
                     nodes = _.map(suggestions, getSuggestionNode);
                     $suggestions.append.apply($suggestions, nodes);
                     that.highlight && highlight({
@@ -1457,16 +1429,18 @@
                 this._updateHint();
             },
             _onOpened: function onOpened() {
+                // console.log("opened");
                 this._updateHint();
                 this.eventBus.trigger("opened");
             },
             _onClosed: function onClosed() {
+                // console.log("closed");
                 this.input.clearHint();
                 this.eventBus.trigger("closed");
             },
             _onFocused: function onFocused() {
                 this.isActivated = true;
-                this.dropdown.open();
+                // this.dropdown.open();
             },
             _onBlurred: function onBlurred() {
                 this.isActivated = false;
@@ -1519,6 +1493,8 @@
                 } else {
                     this.input.clearHint();
                 }
+                inputValue = this.input.getInputValue();
+                if (inputValue === datum.value) { this.dropdown.close(); }
             },
             _autocomplete: function autocomplete(laxCursor, event) {
                 var hint, query, isCursorAtEnd, datum;
@@ -1531,6 +1507,8 @@
                     // if datum is undefined, then the && operand will return false and everything exits
                     // otherwise the second part is evaluated, meaning the word is autocompleted with the "datum.value"
                     this.eventBus.trigger("autocompleted", datum.raw, datum.datasetName);
+                    this.dropdown.close();
+                    _.defer(_.bind(this.dropdown.empty, this.dropdown));
                     event.preventDefault();
                     event.stopPropagation();
                     // $e.stopImmediatePropagation();
@@ -1574,9 +1552,9 @@
         function buildDomStructure(input, withHint) {
             var $input, $wrapper, $dropdown, $hint;
             $input = $(input);
-            $wrapper = $(html.wrapper).css(css.wrapper);
-            $dropdown = $(html.dropdown).css(css.dropdown);
-            $hint = $input.clone().css(css.hint).css(getBackgroundStyles($input));
+            $wrapper = $(html.wrapper);
+            $dropdown = $(html.dropdown);
+            $hint = $input.clone();
             $hint.html("").removeData().addClass("tt-hint").removeAttr("id name placeholder").prop("disabled", true).attr({
                 autocomplete: "off",     // #changed
                 spellcheck: "false"
@@ -1595,18 +1573,6 @@
                 !$input.attr("dir") && $input.attr("dir", "auto");
             } catch (e) {}
             return $input.wrap($wrapper).parent().prepend(withHint ? $hint : null).append($dropdown);
-        }
-        function getBackgroundStyles($el) {
-            return {
-                backgroundAttachment: $el.css("background-attachment"),
-                backgroundClip: $el.css("background-clip"),
-                backgroundColor: $el.css("background-color"),
-                backgroundImage: $el.css("background-image"),
-                backgroundOrigin: $el.css("background-origin"),
-                backgroundPosition: $el.css("background-position"),
-                backgroundRepeat: $el.css("background-repeat"),
-                backgroundSize: $el.css("background-size")
-            };
         }
         function destroyDomStructure($node) {
             var $input = $node.find(".tt-input");
