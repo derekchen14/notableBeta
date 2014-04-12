@@ -1158,7 +1158,6 @@
                 this.source(query, render);
                 function render(suggestions) {
                     if (!that.canceled && query === that.query) {
-                        // console.log("Part 4:", query);
                         that._render(query, suggestions);
                     }
                 }
@@ -1474,7 +1473,14 @@
             _onQueryChanged: function onQueryChanged(e, query) {
                 this.input.clearHintIfInvalid();
                 query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.empty();
-                this.dropdown.open();
+                datum = this.dropdown.getDatumForTopSuggestion();
+                if (datum) {
+                    suggestion = new RegExp(datum.value + "(&nbsp)?");
+                    match = suggestion.exec(query);
+                    match ? this.dropdown.close() : this.dropdown.open();
+                } else {
+                    this.dropdown.close();
+                }
             },
             _onWhitespaceChanged: function onWhitespaceChanged() {
                 this._updateHint();
@@ -1493,8 +1499,6 @@
                 } else {
                     this.input.clearHint();
                 }
-                inputValue = this.input.getInputValue();
-                if (inputValue === datum.value) { this.dropdown.close(); }
             },
             _autocomplete: function autocomplete(laxCursor, event) {
                 var hint, query, isCursorAtEnd, datum;
