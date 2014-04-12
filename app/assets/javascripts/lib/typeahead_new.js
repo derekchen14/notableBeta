@@ -681,42 +681,6 @@
             return false;
         }
     })(this);
-    var html = {
-        wrapper: '<span class="twitter-typeahead"></span>',
-        dropdown: '<span class="tt-dropdown-menu"></span>',
-        dataset: '<div class="tt-dataset-%CLASS%"></div>',
-        suggestions: '<span class="tt-suggestions"></span>',
-        suggestion: '<div class="tt-suggestion"></div>'
-    };
-    var css = {
-        input: {
-            position: "relative",
-            verticalAlign: "top",
-            backgroundColor: "transparent"
-        },
-        inputWithNoHint: {
-            position: "relative",
-            verticalAlign: "top"
-        },
-        suggestion: {
-            whiteSpace: "nowrap",
-            cursor: "pointer"
-        },
-        suggestionChild: {
-            whiteSpace: "normal"
-        },
-
-    };
-    if (_.isMsie()) {
-        _.mixin(css.input, {
-            backgroundImage: "url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7)"
-        });
-    }
-    if (_.isMsie() && _.isMsie() <= 7) {
-        _.mixin(css.input, {
-            marginTop: "-1px"
-        });
-    }
     var EventBus = function() {
         var namespace = "typeahead:";
         function EventBus(o) {
@@ -1083,7 +1047,8 @@
             this.source = o.source;
             this.displayFn = getDisplayFn(o.display || o.displayKey);
             this.templates = getTemplates(o.templates, this.displayFn);
-            this.$el = $(html.dataset.replace("%CLASS%", this.name));
+            datasetHTML = '<div class="tt-dataset-%CLASS%"></div>'.replace("%CLASS%", this.name);
+            this.$el = $(datasetHTML);
         }
         Dataset.extractDatasetName = function extractDatasetName(el) {
             return $(el).data(datasetKey);
@@ -1099,14 +1064,13 @@
                 if (!this.$el) {
                     return;
                 }
-                // suggestions.push("prepare");                // #changed
                 var that = this, hasSuggestions;
                 this.$el.empty();
                 hasSuggestions = suggestions && suggestions.length;
                 if (!hasSuggestions && this.templates.empty) {
-                    this.$el.html(getEmptyHtml()).prepend(that.templates.header ? getHeaderHtml() : null).append(that.templates.footer ? getFooterHtml() : null);
+                    this.$el.html(getEmptyHtml());
                 } else if (hasSuggestions) {
-                    this.$el.html(getSuggestionsHtml()).prepend(that.templates.header ? getHeaderHtml() : null).append(that.templates.footer ? getFooterHtml() : null);
+                    this.$el.html(getSuggestionsHtml());
                 }
                 this.trigger("rendered");
                 function getEmptyHtml() {
@@ -1117,7 +1081,7 @@
                 }
                 function getSuggestionsHtml() {
                     var $suggestions, nodes;
-                    $suggestions = $(html.suggestions);
+                    $suggestions = $('<span class="tt-suggestions"></span>');
                     nodes = _.map(suggestions, getSuggestionNode);
                     $suggestions.append.apply($suggestions, nodes);
                     that.highlight && highlight({
@@ -1126,26 +1090,11 @@
                     });
                     return $suggestions;
                     function getSuggestionNode(suggestion) {
-                        // console.log("Suggestion:", suggestion);
                         var $el;
-                        $el = $(html.suggestion).append(that.templates.suggestion(suggestion)).data(datasetKey, that.name).data(valueKey, that.displayFn(suggestion)).data(datumKey, suggestion);
-                        $el.children().each(function() {
-                            $(this).css(css.suggestionChild);
-                        });
+                        $el = $('<div class="tt-suggestion"></div>');
+                        $el.append(that.templates.suggestion(suggestion)).data(datasetKey, that.name).data(valueKey, that.displayFn(suggestion)).data(datumKey, suggestion);
                         return $el;
                     }
-                }
-                function getHeaderHtml() {
-                    return that.templates.header({
-                        query: query,
-                        isEmpty: !hasSuggestions
-                    });
-                }
-                function getFooterHtml() {
-                    return that.templates.footer({
-                        query: query,
-                        isEmpty: !hasSuggestions
-                    });
                 }
             },
             getRoot: function getRoot() {
@@ -1188,8 +1137,6 @@
         function getTemplates(templates, displayFn) {
             return {
                 empty: templates.empty && _.templatify(templates.empty),
-                header: templates.header && _.templatify(templates.header),
-                footer: templates.footer && _.templatify(templates.footer),
                 suggestion: templates.suggestion || suggestionTemplate
             };
             function suggestionTemplate(context) {
@@ -1556,8 +1503,8 @@
         function buildDomStructure(input, withHint) {
             var $input, $wrapper, $dropdown, $hint;
             $input = $(input);
-            $wrapper = $(html.wrapper);
-            $dropdown = $(html.dropdown);
+            $wrapper = $('<span class="typeahead"></span>');
+            $dropdown = $('<span class="tt-dropdown-menu"></span>');
             $hint = $input.clone();
             $hint.html("").removeData().addClass("tt-hint").removeAttr("id name placeholder").prop("disabled", true).attr({
                 autocomplete: "off",     // #changed
@@ -1572,7 +1519,7 @@
             $input.addClass("tt-input").attr({
                 autocomplete: "off",
                 spellcheck: false
-            }).css(withHint ? css.input : css.inputWithNoHint);
+            });
             try {
                 !$input.attr("dir") && $input.attr("dir", "auto");
             } catch (e) {}

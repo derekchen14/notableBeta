@@ -60,7 +60,7 @@
 	.bullet {
 	}
 
-	.twitter-typeahead {
+	.typeahead {
 		position: relative;
 		.tt-dropdown-menu {
       position: absolute;
@@ -80,6 +80,7 @@
 				.tt-suggestion {
 					cursor: pointer;
 					padding: 3%;
+          white-space: nowrap;
 					p { margin: 0 1em 0.3em 0; }
 					&.tt-cursor {
 						background-color: $notableBlue;
@@ -91,13 +92,14 @@
 		.tt-hint {
 			color: $gray;
 			position: absolute;
-			// top: 0;
 			left: 0;
 		}
-		.tt-input {}
+		.tt-input {
+			position: relative;
+			vertical-align: top;
+			background-color: transparent;
+		}
 	}
-
-
 
 
 }
