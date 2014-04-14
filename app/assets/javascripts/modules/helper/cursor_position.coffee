@@ -14,6 +14,9 @@
 			sel.removeAllRanges()
 			sel.addRange(range)
 
+		play: ->
+			console.log "play"
+
 		setCursor: ($elem, position = false) ->
 			if typeof position is "string"
 				@setCursorPosition position, $elem[0]

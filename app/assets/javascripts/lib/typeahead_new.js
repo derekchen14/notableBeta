@@ -1105,7 +1105,7 @@
                 this.query = query;
                 this.canceled = false;
                 this.source(query, render);
-                console.log("Part 1");
+                console.log("Dataset update");
                 function render(suggestions) {
                     if (!that.canceled && query === that.query) {
                         that._render(query, suggestions);
@@ -1352,8 +1352,9 @@
                 input: $input,
                 hint: $hint,
             }).onSync("focused", this._onFocused, this).onSync("blurred", this._onBlurred, this).onSync("enterKeyed", this._onEnterKeyed, this).onSync("tabKeyed", this._onTabKeyed, this).onSync("escKeyed", this._onEscKeyed, this).onSync("upKeyed", this._onUpKeyed, this).onSync("downKeyed", this._onDownKeyed, this).onSync("queryChanged", this._onQueryChanged, this).onSync("whitespaceChanged", this._onWhitespaceChanged, this);
-            // .onSync("leftKeyed", this._onLeftKeyed, this).onSync("rightKeyed", this._onRightKeyed, this)
-            // this._setLanguageDirection();
+            $input.bind('typeahead:closed', function(args){
+                Notable.Helper.CursorPositionAPI.placeCursorAtEnd($input);
+            });
         }
         _.mixin(Typeahead.prototype, {
             _onSuggestionClicked: function onSuggestionClicked(type, $el) {
@@ -1375,12 +1376,10 @@
                 this._updateHint();
             },
             _onOpened: function onOpened() {
-                // console.log("opened");
                 this._updateHint();
                 this.eventBus.trigger("opened");
             },
             _onClosed: function onClosed() {
-                // console.log("closed");
                 this.input.clearHint();
                 this.eventBus.trigger("closed");
             },
@@ -1397,11 +1396,11 @@
                 var cursorDatum = this.dropdown.getDatumForCursor(); // if cursor is on a suggestion
                 // grab the suggestion that the user selected and autocomplete the word with the suggestion
                 // otherwise, if the cursor is already on a hint, autocomplete the word with that hint
-                cursorDatum ? this._select(cursorDatum, $e) : this._autocomplete(true, $e);
+                cursorDatum ? this._select(cursorDatum, $e) : this._autocomplete($e);
             },
             _onEnterKeyed: function onEnterKeyed(type, $e) {
                 var cursorDatum = this.dropdown.getDatumForCursor();
-                cursorDatum ? this._select(cursorDatum, $e) : this._autocomplete(true, $e);
+                cursorDatum ? this._select(cursorDatum, $e) : this._autocomplete($e);
             },
             _onEscKeyed: function onEscKeyed() {
                 this.dropdown.close();
@@ -1441,7 +1440,7 @@
                 }
                 // datum = this.dropdown.getDatumForTopSuggestion();
                 suggestions = this.dropdown._getSuggestions();
-                console.log("Part 2");
+                // console.log("On Query Changed");
                 if (suggestions.length > 0) {
                     suggestionRegex = new RegExp(suggestions[0].textContent + "(&nbsp)?");
                     match = suggestionRegex.exec(query);
@@ -1469,11 +1468,12 @@
                     this.input.clearHint();
                 }
             },
-            _autocomplete: function autocomplete(laxCursor, event) {
+            _autocomplete: function autocomplete(event) {
                 var hint, query, isCursorAtEnd, datum;
                 hint = this.input.getHint();     // "prepare"
                 query = this.input.getQuery();   //  "pre"
-                isCursorAtEnd = laxCursor || this.input.isCursorAtEnd();
+                // isCursorAtEnd = laxCursor || this.input.isCursorAtEnd();
+                isCursorAtEnd = this.input.isCursorAtEnd();
                 if (hint && query !== hint && isCursorAtEnd) {
                     datum = this.dropdown.getDatumForTopSuggestion();
                     datum && this.input.setInputValue(datum.value); // double ampersand will check if "datum" exists
