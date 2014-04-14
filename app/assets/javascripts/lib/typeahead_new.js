@@ -692,6 +692,7 @@
         _.mixin(EventBus.prototype, {
             trigger: function(type) {
                 var args = [].slice.call(arguments, 1);
+                // console.log(namespace+type);
                 this.$el.trigger(namespace + type, args);
             }
         });
@@ -1352,7 +1353,9 @@
                 input: $input,
                 hint: $hint,
             }).onSync("focused", this._onFocused, this).onSync("blurred", this._onBlurred, this).onSync("enterKeyed", this._onEnterKeyed, this).onSync("tabKeyed", this._onTabKeyed, this).onSync("escKeyed", this._onEscKeyed, this).onSync("upKeyed", this._onUpKeyed, this).onSync("downKeyed", this._onDownKeyed, this).onSync("queryChanged", this._onQueryChanged, this).onSync("whitespaceChanged", this._onWhitespaceChanged, this);
-            $input.bind('typeahead:closed', function(args){
+            $input.bind('typeahead:selected', function() {
+                Notable.Helper.CursorPositionAPI.placeCursorAtEnd($input);
+            }).bind('typeahead:autocompleted', function() {
                 Notable.Helper.CursorPositionAPI.placeCursorAtEnd($input);
             });
         }
