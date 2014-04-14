@@ -1,11 +1,15 @@
 @Notable.module "Leaf", (Leaf, App, Backbone, Marionette, $, _) ->
 	Leaf.startWithParent = false
 
-	App.Leaf =
+	Leaf.Controller = Marionette.Controller.extend
+		initialize: ->
+			@setEvents()
+			@setGlobals()
 		start: ->
 			App.Notebook.initializedTrunk.then =>
 				notebook_id = App.Notebook.activeTrunk.id
 				@startBloodhound(notebook_id)
+
 		startBloodhound: (id) ->
 			engine = new Bloodhound
 				limit: 5
@@ -31,3 +35,18 @@
 				name: "suggestions"
 				displayKey: "suggestion"
 				source: engine.ttAdapter()
+		setGlobals: ->
+			# @exportLeafUser = new App.Leaf.ExportModel()
+			# User.activeUserInitialized = $.Deferred()
+			# User.activeUser = @activeUser
+			# User.idle = true
+		setEvents: ->
+		# evernoteEventListeners:
+		# 	sync_flow: ->
+		# 		$('.sync-with-Leaf').on 'click', (e) ->
+		# 			e.preventDefault()
+
+	# Initializers -------------------------
+	Leaf.addInitializer ->
+		Leaf.leafController = new Leaf.Controller()
+		Leaf.leafController.start()

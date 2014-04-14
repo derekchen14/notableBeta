@@ -1105,6 +1105,7 @@
                 this.query = query;
                 this.canceled = false;
                 this.source(query, render);
+                console.log("Part 1");
                 function render(suggestions) {
                     if (!that.canceled && query === that.query) {
                         that._render(query, suggestions);
@@ -1157,7 +1158,6 @@
             this.isOpen = false;
             this.isEmpty = true;
             this.datasets = _.map(o.datasets, initializeDataset);
-            // console.log("Datasets:", o.datasets);
             onSuggestionClick = _.bind(this._onSuggestionClick, this);
             onSuggestionMouseEnter = _.bind(this._onSuggestionMouseEnter, this);
             onSuggestionMouseLeave = _.bind(this._onSuggestionMouseLeave, this);
@@ -1350,7 +1350,7 @@
             }).onSync("suggestionClicked", this._onSuggestionClicked, this).onSync("cursorMoved", this._onCursorMoved, this).onSync("cursorRemoved", this._onCursorRemoved, this).onSync("opened", this._onOpened, this).onSync("closed", this._onClosed, this).onAsync("datasetRendered", this._onDatasetRendered, this);
             this.input = new Input({
                 input: $input,
-                hint: $hint
+                hint: $hint,
             }).onSync("focused", this._onFocused, this).onSync("blurred", this._onBlurred, this).onSync("enterKeyed", this._onEnterKeyed, this).onSync("tabKeyed", this._onTabKeyed, this).onSync("escKeyed", this._onEscKeyed, this).onSync("upKeyed", this._onUpKeyed, this).onSync("downKeyed", this._onDownKeyed, this).onSync("queryChanged", this._onQueryChanged, this).onSync("whitespaceChanged", this._onWhitespaceChanged, this);
             // .onSync("leftKeyed", this._onLeftKeyed, this).onSync("rightKeyed", this._onRightKeyed, this)
             // this._setLanguageDirection();
@@ -1417,15 +1417,37 @@
                 this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorDown($e);
                 this.dropdown.open();
             },
+        // var online,
+        //   _this = this;
+        // online = App.Helper.ConnectionAPI.checkConnection;
+        // return $.when(online()).then((function() {
+        //   return _this.selectTrunk();
+        // }), (function() {
+        //   App.Notify.alert('preventNotebook', 'warning', {
+        //     destructTime: 9000
+        //   });
+        //   return App.Helper.eventManager.trigger("closeSidr");
+        // }));
+
+        // turn dropdown into a promise
+        // allow dropdown to handle Callbacks
+        // capture where dropdown triggers a event, and react accordingly
             _onQueryChanged: function onQueryChanged(e, query) {
                 this.input.clearHintIfInvalid();
-                query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.empty();
-                datum = this.dropdown.getDatumForTopSuggestion();
-                if (datum) {
-                    suggestion = new RegExp(datum.value + "(&nbsp)?");
-                    match = suggestion.exec(query);
+                if (query.length >= this.minLength) {
+                    this.dropdown.update(query)
+                } else {
+                    this.dropdown.empty();
+                }
+                // datum = this.dropdown.getDatumForTopSuggestion();
+                suggestions = this.dropdown._getSuggestions();
+                console.log("Part 2");
+                if (suggestions.length > 0) {
+                    suggestionRegex = new RegExp(suggestions[0].textContent + "(&nbsp)?");
+                    match = suggestionRegex.exec(query);
                     match ? this.dropdown.close() : this.dropdown.open();
                 } else {
+                    // this._updateHint();
                     this.dropdown.close();
                 }
             },
