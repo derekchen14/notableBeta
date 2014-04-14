@@ -60,6 +60,48 @@
 	.bullet {
 	}
 
+	.typeahead {
+		position: relative;
+		.tt-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 27;
+      display: none;
+			.tt-suggestions {
+        display: block;
+				background-color: $white;
+				border: 1px solid $grayLight;
+				padding: 0 4%;
+				margin-left: 0.8em;
+				border-top: none;
+				border-bottom-right-radius: 5px;
+				border-bottom-left-radius: 5px;
+				.tt-suggestion {
+					cursor: pointer;
+					padding: 3%;
+          white-space: nowrap;
+					p { margin: 0 1em 0.3em 0; }
+					&.tt-cursor {
+						background-color: $notableBlue;
+						color: $white;
+					}
+				}
+			}
+		}
+		.tt-hint {
+			color: $gray;
+			position: absolute;
+			left: 0;
+		}
+		.tt-input {
+			position: relative;
+			vertical-align: top;
+			background-color: transparent;
+		}
+	}
+
+
 }
 
 // ----------------------------------------------------

@@ -65,6 +65,7 @@ class NotesController < ApplicationController
   private
     def getWords(note)
       content = note.gsub(/&nbsp;|\?|\!|\.|,/, ' ')
+      puts "Content: #{content}"
       newWords = content.gsub(/\s+/, ' ').strip.split(" ")
       newWords.delete_if { |word| word.match /\W/ }
       newWords.delete_if { |word| word.length < 6 }

@@ -8,7 +8,7 @@ class SuggestionsController < ApplicationController
       words = $redis.hgetall "Notebook:#{notebook.id}"
       words.each do |word, count|
         $redis.hdel "Notebook:#{notebook.id}", word if count.to_i <= 0
-        @suggestions << {suggestion: word} if count.to_i > 3
+        @suggestions << {suggestion: word} if count.to_i >= 3
       end
     end
     respond_with @suggestions # send to bloodhound
@@ -18,7 +18,7 @@ class SuggestionsController < ApplicationController
     suggest = []
     words = $redis.hgetall "Notebook:#{params[:id]}"
     words.each do |word, count|
-      if word.start_with? params[:q] and count.to_i > 3
+      if word.start_with? params[:q] and count.to_i >= 3
         suggest << {suggestion: word}
       end
     end
