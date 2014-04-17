@@ -961,6 +961,8 @@
             },
             resetInputValue: function resetInputValue() {
                 this.setInputValue(this.query, true);
+                console.log(this.$input);
+                Notable.Helper.CursorPositionAPI.placeCursorAtEnd(this.$input);
             },
             getHint: function getHint() {
                 return this.$hint.html().trim();            // #changed
@@ -1214,17 +1216,20 @@
                 $oldCursor = this._getCursor();
                 $suggestions = this._getSuggestions();
                 this._removeCursor();
+                dino = $suggestions.index($oldCursor)
                 newCursorIndex = $suggestions.index($oldCursor) + increment;
                 newCursorIndex = (newCursorIndex + 1) % ($suggestions.length + 1) - 1;
                 if (newCursorIndex === -1) {
                     this.trigger("cursorRemoved");
+                    event.preventDefault();
+                    event.stopPropagation();
                     return;
                 } else if (newCursorIndex < -1) {
                     newCursorIndex = $suggestions.length - 1;
                 }
+                // console.log(this);
                 this._setCursor($newCursor = $suggestions.eq(newCursorIndex));
                 this._ensureVisible($newCursor);
-                // console.log(event);
                 event.preventDefault();
                 event.stopPropagation();
             },
@@ -1255,9 +1260,6 @@
                     this.trigger("opened");
                 }
             },
-            // setLanguageDirection: function setLanguageDirection(dir) {
-            //     this.$menu.css(dir === "ltr" ? css.ltr : css.rtl);
-            // },
             moveCursorUp: function moveCursorUp(e) {
                 this._moveCursor(-1, e);
             },
@@ -1392,6 +1394,7 @@
             },
             _onBlurred: function onBlurred() {
                 this.isActivated = false;
+                console.log("blurred");
                 this.dropdown.empty();
                 this.dropdown.close();
             },
@@ -1531,7 +1534,7 @@
             $wrapper = $('<span class="typeahead"></span>');
             $dropdown = $('<span class="tt-dropdown-menu"></span>');
             $hint = $input.clone();
-            $hint.html("").removeData().addClass("tt-hint").removeAttr("id name placeholder").prop("disabled", true).attr({
+            $hint.html("").removeData().addClass("tt-hint").removeClass("note-content").removeAttr("id name placeholder contenteditable").prop("disabled", true).attr({
                 autocomplete: "off",     // #changed
                 spellcheck: "false"
             });
