@@ -882,8 +882,15 @@
         };
         _.mixin(Input.prototype, EventEmitter, {
             // _onBlur: function onBlur() {
-            //     this.resetInputValue();
+            //     // this.resetInputValue();
+            //     this.setInputValue(this.query, true);
+            //     console.log("Part 4: Input - Blur");
             //     this.trigger("blurred");
+            // },
+            // resetInputValue: function resetInputValue() {
+            //     this.setInputValue(this.query, true);
+            //     console.log("Part 3: Input - resetInputValue")
+            //     Notable.Helper.CursorPositionAPI.placeCursorAtEnd(this.$input);
             // },
             _onFocus: function onFocus() {
                 this.trigger("focused");
@@ -891,6 +898,7 @@
             _onKeydown: function onKeydown($e) {
                 var keyName = specialKeyCodeMap[$e.which || $e.keyCode];
                 this._managePreventDefault(keyName, $e);
+                // console.log("Part 1: Input - Keydown");
                 if (keyName && this._shouldTrigger(keyName, $e)) {
                     this.trigger(keyName + "Keyed", $e);
                 }
@@ -949,26 +957,26 @@
             getQuery: function getQuery() {
                 return this.query;
             },
-            setQuery: function setQuery(query) {
+            setQuery: function setQuery(query) {                                                        // INPUT
                 this.query = query;
             },
             getInputValue: function getInputValue() {
-                return this.$input.html().trim();           // #changed
+                return this.$input.html().trim();
             },
             setInputValue: function setInputValue(value, silent) {
-                this.$input.html(value);                    // #changed
+                this.$input.html(value);
                 silent ? this.clearHint() : this._checkInputValue();
             },
             resetInputValue: function resetInputValue() {
                 this.setInputValue(this.query, true);
-                console.log(this.$input);
+                // console.log("Part 3: Input - resetInputValue")
                 Notable.Helper.CursorPositionAPI.placeCursorAtEnd(this.$input);
             },
             getHint: function getHint() {
-                return this.$hint.html().trim();            // #changed
+                return this.$hint.html().trim();
             },
             setHint: function setHint(value) {
-                this.$hint.html(value);                     // #changed
+                this.$hint.html(value);
             },
             clearHint: function clearHint() {
                 this.setHint("");
@@ -1108,7 +1116,7 @@
                 this.query = query;
                 this.canceled = false;
                 this.source(query, render);
-                console.log("Dataset update");
+                console.log("Part 3: Dataset - Update");
                 function render(suggestions) {
                     if (!that.canceled && query === that.query) {
                         that._render(query, suggestions);
@@ -1121,7 +1129,7 @@
             clear: function clear() {
                 this.cancel();
                 this.$el.empty();
-                this.trigger("rendered");
+                this.trigger("rendered");                               // DATASET
             },
             isEmpty: function isEmpty() {
                 return this.$el.is(":empty");
@@ -1216,7 +1224,6 @@
                 $oldCursor = this._getCursor();
                 $suggestions = this._getSuggestions();
                 this._removeCursor();
-                dino = $suggestions.index($oldCursor)
                 newCursorIndex = $suggestions.index($oldCursor) + increment;
                 newCursorIndex = (newCursorIndex + 1) % ($suggestions.length + 1) - 1;
                 if (newCursorIndex === -1) {
@@ -1227,7 +1234,6 @@
                 } else if (newCursorIndex < -1) {
                     newCursorIndex = $suggestions.length - 1;
                 }
-                // console.log(this);
                 this._setCursor($newCursor = $suggestions.eq(newCursorIndex));
                 this._ensureVisible($newCursor);
                 event.preventDefault();
@@ -1250,7 +1256,7 @@
                     this.isOpen = false;
                     this._removeCursor();
                     this._hide();
-                    this.trigger("closed");
+                    this.trigger("closed");                                                 // Dropdown
                 }
             },
             open: function open() {
@@ -1374,6 +1380,7 @@
                 this.eventBus.trigger("cursorchanged", datum.raw, datum.datasetName);
             },
             _onCursorRemoved: function onCursorRemoved() {
+                // console.log("Part 7: Typeahead - cursorRemoved");
                 this.input.resetInputValue();
                 this._updateHint();
             },
@@ -1388,13 +1395,12 @@
                 this.input.clearHint();
                 this.eventBus.trigger("closed");
             },
-            _onFocused: function onFocused() {
+            _onFocused: function onFocused() {                                  // TYPEAHEAD
                 this.isActivated = true;
                 // this.dropdown.open();
             },
             _onBlurred: function onBlurred() {
                 this.isActivated = false;
-                console.log("blurred");
                 this.dropdown.empty();
                 this.dropdown.close();
             },
@@ -1415,12 +1421,14 @@
             _onUpKeyed: function onUpKeyed(type, $e) {
                 var query = this.input.getQuery();
                 this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorUp($e);
-                this.dropdown.open();
+                // console.log("Part 2: Typeahead - KeyUp");
+                // this.dropdown.open();
             },
             _onDownKeyed: function onDownKeyed(type, $e) {
                 var query = this.input.getQuery();
                 this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorDown($e);
-                this.dropdown.open();
+                // console.log("Part 2: Typeahead - KeyDown");
+                // this.dropdown.open();
             },
         // var online,
         //   _this = this;
@@ -1600,6 +1608,7 @@
             },
             close: function close() {
                 return this.each(closeTypeahead);
+                console.log("here at old?");
                 function closeTypeahead() {
                     var $input = $(this), typeahead;
                     if (typeahead = $input.data(typeaheadKey)) {
