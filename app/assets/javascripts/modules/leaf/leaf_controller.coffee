@@ -13,7 +13,10 @@
 		startBloodhound: (id) ->
 			engine = new Bloodhound
 				limit: 5
-				local: [{suggestion: "Notable"}]
+				local: [{suggestion: "sophomore"}, {suggestion: "achieve"}, {suggestion: "apparent"},
+					{suggestion: "calendar"}, {suggestion: "congratulate"}, {suggestion: "desperate"},
+					{suggestion: "receive"}, {suggestion: "ignorance"}, {suggestion: "judgment"},
+					{suggestion: "conscious"}, {suggestion: "February"}, {suggestion: "definition"}]
 				prefetch: '/suggestions.json'
 				remote: 'suggestions/'+id+'.json?q=%QUERY'
 				dupDetector: (remote, local) ->
@@ -28,13 +31,15 @@
 				.done( => @startTypeAhead(engine) )
 				.fail( -> console.log('Error with Bloodhound') )
 		startTypeAhead: (engine) ->
-			$(".note-content").typeahead
-				minLength: 3
-				highlight: true
-			,
-				name: "suggestions"
-				displayKey: "suggestion"
-				source: engine.ttAdapter()
+			App.Note.initializedTree.then =>
+				$(".note-content").typeahead
+					minLength: 3
+					highlight: true
+				,
+					name: "suggestions"
+					displayKey: "suggestion"
+					source: engine.ttAdapter()
+				App.Helper.CursorPositionAPI.resetToTreeTop()
 		setGlobals: ->
 			# @exportLeafUser = new App.Leaf.ExportModel()
 			# User.activeUserInitialized = $.Deferred()

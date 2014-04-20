@@ -48,7 +48,6 @@
 			@allNotesByDepth.each (note) =>
 				@tree.add(note, silent:true)
 			@showContentView(@tree)
-			Note.eventManager.trigger("setCursor:#{@tree.first().get('guid')}") if @tree.length isnt 0
 			Note.eventManager.trigger "notebook:applyZoom"
 			App.Note.initializedTree.resolve()
 			@showLinksFooter()

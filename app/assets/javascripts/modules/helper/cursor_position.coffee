@@ -14,9 +14,6 @@
 			sel.removeAllRanges()
 			sel.addRange(range)
 
-		play: ->
-			console.log "play"
-
 		setCursor: ($elem, position = false) ->
 			if typeof position is "string"
 				@setCursorPosition position, $elem[0]
@@ -29,6 +26,10 @@
 		placeCursorAtEnd: ($elem) ->
 			range = @selectContent $elem
 			range.collapse false
+			@setSelection range
+		placeCursorAtStart: ($elem) ->
+			range = @selectContent $elem
+			range.collapse true
 			@setSelection range
 		setCursorPosition: (textBefore, parent) ->
 			desiredPosition = @findDesiredPosition textBefore
@@ -129,6 +130,12 @@
 			@textAfterCursor.apply(this, arguments).length is 0
 		isEmptyBeforeCursor: ->
 			@textBeforeCursor.apply(this, arguments).length is 0
+
+		resetToTreeTop: ->
+			if tree = App.Note.activeTree.first()
+				App.Note.eventManager.trigger("setCursor:#{tree.get('guid')}")
+			else
+				@placeCursorAtStart $("#crown .note-content")
 
 	Helper.collectAllMatches = (title, regex = Helper.tagRegex.matchTag, adjustment = 0) ->
 		matches = []

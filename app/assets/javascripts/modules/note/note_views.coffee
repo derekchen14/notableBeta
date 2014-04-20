@@ -195,7 +195,7 @@
 		createNote: (e) ->
 			e.preventDefault()
 			e.stopPropagation()
-			console.log "Note Views"
+			# console.log "Note Views"
 			do create = =>
 				sel = window.getSelection()
 				title = @updateNote()

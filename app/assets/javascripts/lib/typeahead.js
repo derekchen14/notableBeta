@@ -887,11 +887,6 @@
             //     console.log("Part 4: Input - Blur");
             //     this.trigger("blurred");
             // },
-            // resetInputValue: function resetInputValue() {
-            //     this.setInputValue(this.query, true);
-            //     console.log("Part 3: Input - resetInputValue")
-            //     Notable.Helper.CursorPositionAPI.placeCursorAtEnd(this.$input);
-            // },
             _onFocus: function onFocus() {
                 this.trigger("focused");
             },
@@ -989,9 +984,6 @@
                 isValid = val !== "" && valIsPrefixOfHint && !this.hasOverflow();
                 !isValid && this.clearHint();
             },
-            // getLanguageDirection: function getLanguageDirection() {
-            //     return (this.$input.css("direction") || "ltr").toLowerCase();
-            // },
             hasOverflow: function hasOverflow() {
                 var constraint = this.$input.width() - 2;
                 this.$overflowHelper.text(this.getInputValue());
@@ -1116,7 +1108,7 @@
                 this.query = query;
                 this.canceled = false;
                 this.source(query, render);
-                console.log("Part 3: Dataset - Update");
+                // console.log("Part 3: Dataset - Update");
                 function render(suggestions) {
                     if (!that.canceled && query === that.query) {
                         that._render(query, suggestions);
