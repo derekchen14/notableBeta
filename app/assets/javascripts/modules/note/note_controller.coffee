@@ -48,6 +48,7 @@
 			@allNotesByDepth.each (note) =>
 				@tree.add(note, silent:true)
 			@showContentView(@tree)
+			App.Helper.CursorPositionAPI.resetToTreeTop()
 			Note.eventManager.trigger "notebook:applyZoom"
 			App.Note.initializedTree.resolve()
 			@showLinksFooter()

@@ -45,7 +45,6 @@
 			App.Note.eventManager.trigger "render:#{App.Note.activeBranch.get('guid')}" if App.Note.activeBranch isnt "root"
 			App.Note.eventManager.trigger "setCursor:#{App.Note.activeTree.last().get('guid')}"
 			App.Notify.alert 'newNote','success'
-			# mixpanel.track("New Note")
 		shiftNavbar: (e) ->
 			$(".navbar-header").toggleClass("navbar-shift")
 			$(".navbar-right").toggleClass("navbar-shift")

@@ -46,6 +46,7 @@
 			@trimExtraDropTarget()
 			App.Note.eventManager.trigger "setCursor:#{@model.get('guid')}"
 			@renderCollapsed()
+			App.Leaf.eventManager.trigger "typeahead:attach", @ui.noteContent
 			@addRootStyling()
 		appendHtml:(collectionView, itemView, i) ->
 			@$('.descendants:first').append(itemView.el)
@@ -353,7 +354,6 @@
 			Note.eventManager.off 'renderTreeView', @render, this
 			@drag = undefined
 
-		onBeforeRender: ->
 		onRender: -> @addDefaultNote false
 		addDefaultNote: (render = true) ->
 			# if @collection.length is 0 then @collection.create()

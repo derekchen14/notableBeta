@@ -45,20 +45,6 @@
 		bindKeyboardShortcuts: ->
 			@.$el.on 'keydown', null, 'return', @createNote.bind @
 			@.$el.on 'keydown', null, 'ctrl+shift+backspace meta+shift+backspace', @triggerShortcut 'deleteNote'
-			@.$el.on 'keydown', null, 'tab', @triggerShortcut 'tabNote'
-			@.$el.on 'keydown', null, 'shift+tab', @triggerShortcut 'unTabNote'
-			@.$el.on 'keydown', null, 'alt+right meta+right', @triggerShortcut 'tabNote'
-			@.$el.on 'keydown', null, 'alt+left meta+left', @triggerShortcut 'unTabNote'
-			@.$el.on 'keydown', null, 'alt+up meta+up', @triggerShortcut 'jumpPositionUp'
-			@.$el.on 'keydown', null, 'alt+down meta+down', @triggerShortcut 'jumpPositionDown'
-			@.$el.on 'keydown', null, 'up', @triggerShortcut 'jumpFocusUp'
-			@.$el.on 'keydown', null, 'down', @triggerShortcut 'jumpFocusDown'
-			@.$el.on 'keydown', null, 'right', @arrowRightJumpLine.bind @
-			@.$el.on 'keydown', null, 'left', @arrowLeftJumpLine.bind @
-			@.$el.on 'keydown', null, 'backspace', @mergeWithPreceding.bind @
-			@.$el.on 'keydown', null, 'del', @mergeWithFollowing.bind @
-			@.$el.on 'keydown', null, 'ctrl+s meta+s', @triggerSaving.bind @
-			@.$el.on 'keydown', null, 'ctrl+z meta+z', @triggerUndoEvent
 
 		runCalculations: ->
 			Note.mindmap.height = @calculateHeight() if Note.mindmap.height is 0

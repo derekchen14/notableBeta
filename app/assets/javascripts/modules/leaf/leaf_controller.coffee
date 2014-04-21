@@ -1,17 +1,23 @@
 @Notable.module "Leaf", (Leaf, App, Backbone, Marionette, $, _) ->
 	Leaf.startWithParent = false
+	Leaf.eventManager = _.extend {}, Backbone.Events
 
 	Leaf.Controller = Marionette.Controller.extend
 		initialize: ->
-			@setEvents()
+			@eventManager = Leaf.eventManager
 			@setGlobals()
+			@setEvents()
 		start: ->
 			App.Notebook.initializedTrunk.then =>
 				notebook_id = App.Notebook.activeTrunk.id
 				@startBloodhound(notebook_id)
+		setGlobals: ->
+		setEvents: ->
+			@eventManager.on "typeahead:attach", @attachTypeahead, @
+			# @eventManager.on "pushProgress", @progressView.pushProgress, @
 
 		startBloodhound: (id) ->
-			engine = new Bloodhound
+			@engine = new Bloodhound
 				limit: 5
 				local: [{suggestion: "sophomore"}, {suggestion: "achieve"}, {suggestion: "apparent"},
 					{suggestion: "calendar"}, {suggestion: "congratulate"}, {suggestion: "desperate"},
@@ -24,32 +30,20 @@
 				datumTokenizer: (d) ->
 					Bloodhound.tokenizers.whitespace(d.suggestion)
 				queryTokenizer: Bloodhound.tokenizers.whitespace
-			engine.clear()
-			engine.clearPrefetchCache()
-			bloodhoundInitialized = engine.initialize(true)
+			@engine.clear()
+			@engine.clearPrefetchCache()
+			bloodhoundInitialized = @engine.initialize(true)
 			bloodhoundInitialized
-				.done( => @startTypeAhead(engine) )
+				.done( => console.log "empty" )
 				.fail( -> console.log('Error with Bloodhound') )
-		startTypeAhead: (engine) ->
-			App.Note.initializedTree.then =>
-				$(".note-content").typeahead
-					minLength: 3
-					highlight: true
-				,
-					name: "suggestions"
-					displayKey: "suggestion"
-					source: engine.ttAdapter()
-				App.Helper.CursorPositionAPI.resetToTreeTop()
-		setGlobals: ->
-			# @exportLeafUser = new App.Leaf.ExportModel()
-			# User.activeUserInitialized = $.Deferred()
-			# User.activeUser = @activeUser
-			# User.idle = true
-		setEvents: ->
-		# evernoteEventListeners:
-		# 	sync_flow: ->
-		# 		$('.sync-with-Leaf').on 'click', (e) ->
-		# 			e.preventDefault()
+		attachTypeahead: (input) ->
+			input.typeahead
+				minLength: 3
+				highlight: true
+			,
+				name: "suggestions"
+				displayKey: "suggestion"
+				source: @engine.ttAdapter()
 
 	# Initializers -------------------------
 	Leaf.addInitializer ->
