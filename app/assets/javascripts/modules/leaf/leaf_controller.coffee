@@ -33,9 +33,9 @@
 			@engine.clear()
 			@engine.clearPrefetchCache()
 			bloodhoundInitialized = @engine.initialize(true)
-			bloodhoundInitialized
-				.done( => console.log "empty" )
-				.fail( -> console.log('Error with Bloodhound') )
+			# bloodhoundInitialized
+			# 	.done( => console.log "Bloodhound initialized" )
+			# 	.fail( -> console.log "Error with Bloodhound" )
 		attachTypeahead: (input) ->
 			input.typeahead
 				minLength: 3

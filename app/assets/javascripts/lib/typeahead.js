@@ -692,7 +692,6 @@
         _.mixin(EventBus.prototype, {
             trigger: function(type) {
                 var args = [].slice.call(arguments, 1);
-                // console.log(namespace+type);
                 this.$el.trigger(namespace + type, args);
             }
         });
@@ -893,7 +892,6 @@
             _onKeydown: function onKeydown($e) {
                 var keyName = specialKeyCodeMap[$e.which || $e.keyCode];
                 this._managePreventDefault(keyName, $e);
-                // console.log("Part 1: Input - Keydown");
                 if (keyName && this._shouldTrigger(keyName, $e)) {
                     this.trigger(keyName + "Keyed", $e);
                 }
@@ -1377,6 +1375,7 @@
                 this._updateHint();
             },
             _onDatasetRendered: function onDatasetRendered() {
+                // console.log("on dataset rendered");
                 this._updateHint();
             },
             _onOpened: function onOpened() {
@@ -1389,7 +1388,6 @@
             },
             _onFocused: function onFocused() {                                  // TYPEAHEAD
                 this.isActivated = true;
-                // this.dropdown.open();
             },
             _onBlurred: function onBlurred() {
                 this.isActivated = false;
@@ -1437,23 +1435,21 @@
         // turn dropdown into a promise
         // allow dropdown to handle Callbacks
         // capture where dropdown triggers a event, and react accordingly
+
             _onQueryChanged: function onQueryChanged(e, query) {
                 this.input.clearHintIfInvalid();
-                if (query.length >= this.minLength) {
+                if (query.length >= this.minLength) {                                           // TYPEAHEAD
                     this.dropdown.update(query)
                 } else {
                     this.dropdown.empty();
                 }
-                // datum = this.dropdown.getDatumForTopSuggestion();
-                suggestions = this.dropdown._getSuggestions();
-                // console.log("On Query Changed");
-                if (suggestions.length > 0) {
-                    suggestionRegex = new RegExp(suggestions[0].textContent + "(&nbsp)?");
-                    match = suggestionRegex.exec(query);
-                    match ? this.dropdown.close() : this.dropdown.open();
+                suggestions = this.dropdown.datasets[0].$el[0].children;
+                if (suggestions[0] === undefined) {
+                    return // don't do anything if there are no suggestions
                 } else {
-                    // this._updateHint();
-                    this.dropdown.close();
+                    suggestionRegex = new RegExp(suggestions[0].textContent + "(&nbsp)?");
+                    match = suggestionRegex.exec(query);  //checks if query already matches input
+                    match ? this.dropdown.close() : this.dropdown.open();  // closes dropdown after the word completes
                 }
             },
             _onWhitespaceChanged: function onWhitespaceChanged() {
