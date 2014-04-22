@@ -54,7 +54,7 @@
 		exceedPasting: "Pasting limit exceeded. Let us know if you really need to simultaneously paste more than 100 notes."
 		exportPlain: "Your notes are ready for export in plain text format."
 		exportParagraph: "Your notes are ready for export in paragraph form."
-		brokenTree: "Sorry, something just broke. Your notebook was reset to its latest stable state."
+		brokenTree: "Sorry, something just broke. Your notebook will attempt to reset in a few seconds."
 
 	@alert = (message, type, options) ->
 		throw "invalid notification message" unless _notificationMessages[message]?

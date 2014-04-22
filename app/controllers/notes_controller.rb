@@ -62,6 +62,12 @@ class NotesController < ApplicationController
     end
   end
 
+  def reset
+    note = Note.where(guid: params[:guid]).order("id DESC").limit(1).first
+    note.destroy
+    redirect_to root_path
+  end
+
   private
     def getWords(note)
       content = note.gsub(/&nbsp;|\?|\!|\.|,/, ' ')

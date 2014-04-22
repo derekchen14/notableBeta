@@ -13,6 +13,7 @@ Notable::Application.routes.draw do
   get "connect" => "evernote#connect"
   get "finish" => "evernote#finish"
   get "search" => "notes#search"
+  get "reset" => "notes#reset"
 
   get "sync" => "evernote#begin_sync_data"
   post "sync" => "evernote#receive_sync_data"
@@ -25,7 +26,6 @@ Notable::Application.routes.draw do
   end
 
   match ':action' => 'pages#:action'
-
   root :to => 'scaffold#index'
 
   # The priority is based upon order of creation:

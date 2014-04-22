@@ -81,12 +81,18 @@
 				App.Note.allNotesByDepth.validateTree()
 			catch e
 				console.log e
-				@rejectChanges()
+				@rejectChanges(e)
 			@acceptChanges()
-		rejectChanges: ->
+		rejectChanges: (e) ->
 			App.Note.noteController.reset()
-			Action.transporter.storage.clear()
-			App.Notify.alert 'brokenTree', 'danger'
+			if e.slice(0,4) is "rank" then guid = e.slice(-36)
+			online = App.Helper.ConnectionAPI.checkConnection
+			$.when(online()).then ( =>
+				Action.transporter.storage.clear()
+				@resetTree(guid)
+			), ( =>
+				alert "Error caused by connectivity issues related to "+guid
+			)
 			@callback = undefined
 		acceptChanges: ->
 			if Action.transporter.storage.hasChangesToSync()
@@ -94,3 +100,10 @@
 			else
 				@callback() if @callback?
 			@callback = undefined
+		resetTree: (guid) ->
+			$.get "/reset", {guid: guid}, ->
+				App.Notify.alert 'brokenTree', 'danger', selfDestruct: false
+				window.setTimeout ->
+					location.reload()
+				, 14000
+
