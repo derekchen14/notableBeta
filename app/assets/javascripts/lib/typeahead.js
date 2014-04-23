@@ -856,6 +856,8 @@
             onFocus = _.bind(this._onFocus, this);
             onKeydown = _.bind(this._onKeydown, this);
             onInput = _.bind(this._onInput, this);
+            this.preTitle = "";
+            this.postTitle = "";
             this.$hint = $(o.hint);
             this.$input = $(o.input).on("blur.tt", onBlur).on("focus.tt", onFocus).on("keydown.tt", onKeydown);
             if (this.$hint.length === 0) {
@@ -954,7 +956,12 @@
                 this.query = query;
             },
             getInputValue: function getInputValue() {
-                return this.$input.html().trim();
+                title = this.$input.html().trim();
+                startIndex = title.trim().lastIndexOf(" ")+1;
+                endIndex = title.trim().length;
+                this.preTitle = title.slice(0,startIndex);
+                this.postTitle = title.slice(startIndex, endIndex);
+                return this.postTitle;
             },
             setInputValue: function setInputValue(value, silent) {
                 this.$input.html(value);
@@ -1465,7 +1472,13 @@
                     escapedQuery = _.escapeRegExChars(query);
                     frontMatchRegEx = new RegExp("^(?:" + escapedQuery + ")(.+$)", "i");
                     match = frontMatchRegEx.exec(datum.value);
-                    match ? this.input.setHint(val + match[1]) : this.input.clearHint();
+                    console.log(match);
+                    if (match) {
+                        preHint = this.input.preTitle+val;
+                        this.input.setHint(preHint + match[1])
+                    } else {
+                        this.input.clearHint();
+                    }
                 } else {
                     this.input.clearHint();
                 }
