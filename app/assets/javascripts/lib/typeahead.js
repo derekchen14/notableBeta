@@ -857,7 +857,6 @@
             onKeydown = _.bind(this._onKeydown, this);
             onInput = _.bind(this._onInput, this);
             this.preTitle = "";
-            this.postTitle = "";
             this.$hint = $(o.hint);
             this.$input = $(o.input).on("blur.tt", onBlur).on("focus.tt", onFocus).on("keydown.tt", onKeydown);
             if (this.$hint.length === 0) {
@@ -960,16 +959,16 @@
                 startIndex = title.trim().lastIndexOf(" ")+1;
                 endIndex = title.trim().length;
                 this.preTitle = title.slice(0,startIndex);
-                this.postTitle = title.slice(startIndex, endIndex);
-                return this.postTitle;
+                return title.slice(startIndex, endIndex);
             },
             setInputValue: function setInputValue(value, silent) {
-                this.$input.html(value);
+                newTitle = this.preTitle+value;
+                this.$input.html(newTitle);
                 silent ? this.clearHint() : this._checkInputValue();
             },
             resetInputValue: function resetInputValue() {
+                oldTitle = this.preTitle+this.query;
                 this.setInputValue(this.query, true);
-                // console.log("Part 3: Input - resetInputValue")
                 Notable.Helper.CursorPositionAPI.placeCursorAtEnd(this.$input);
             },
             getHint: function getHint() {
@@ -1165,6 +1164,7 @@
             }
             this.isOpen = false;
             this.isEmpty = true;
+            this.preWidth = 0;
             this.datasets = _.map(o.datasets, initializeDataset);
             onSuggestionClick = _.bind(this._onSuggestionClick, this);
             onSuggestionMouseEnter = _.bind(this._onSuggestionMouseEnter, this);
@@ -1188,6 +1188,9 @@
             },
             _onRendered: function onRendered() {
                 this.isEmpty = _.every(this.datasets, isDatasetEmpty);
+                // console.log("Show if false - render, isEmpty:", this.isEmpty);
+                // console.log("Show if true - render, isOpen:", this.isOpen);
+                console.log("Part 3 - dropdown rendered");
                 this.isEmpty ? this._hide() : this.isOpen && this._show();
                 this.trigger("datasetRendered");
                 function isDatasetEmpty(dataset) {
@@ -1198,6 +1201,13 @@
                 this.$menu.hide();
             },
             _show: function() {
+                console.log("(SHOW) outer", this.preWidth);
+                this.trigger("setPreWidth");
+                if (this.preWidth > 0) {
+                    console.log("show INNER");
+                    left = this.preWidth.toString()+"px";
+                    this.$menu.css("left", left);
+                }
                 this.$menu.css("display", "block");
             },
             _getSuggestions: function getSuggestions() {
@@ -1259,6 +1269,8 @@
             open: function open() {
                 if (!this.isOpen) {
                     this.isOpen = true;
+                    console.log("Show if true - open, isPopulated:", !this.isEmpty);
+                    console.log("Part 4 - dropdown open");
                     !this.isEmpty && this._show();
                     this.trigger("opened");
                 }
@@ -1353,7 +1365,7 @@
             this.dropdown = new Dropdown({
                 menu: $menu,
                 datasets: o.datasets
-            }).onSync("suggestionClicked", this._onSuggestionClicked, this).onSync("cursorMoved", this._onCursorMoved, this).onSync("cursorRemoved", this._onCursorRemoved, this).onSync("opened", this._onOpened, this).onSync("closed", this._onClosed, this).onAsync("datasetRendered", this._onDatasetRendered, this);
+            }).onSync("suggestionClicked", this._onSuggestionClicked, this).onSync("cursorMoved", this._onCursorMoved, this).onSync("cursorRemoved", this._onCursorRemoved, this).onSync("opened", this._onOpened, this).onSync("closed", this._onClosed, this).onSync("setPreWidth", this._setPreWidth, this).onAsync("datasetRendered", this._onDatasetRendered, this);
             this.input = new Input({
                 input: $input,
                 hint: $hint,
@@ -1377,15 +1389,16 @@
                 this.eventBus.trigger("cursorchanged", datum.raw, datum.datasetName);
             },
             _onCursorRemoved: function onCursorRemoved() {
-                // console.log("Part 7: Typeahead - cursorRemoved");
+                console.log("on cursor removed (HINT)");
                 this.input.resetInputValue();
                 this._updateHint();
             },
             _onDatasetRendered: function onDatasetRendered() {
-                // console.log("on dataset rendered");
+                console.log("on dataset rendered (HINT)");
                 this._updateHint();
             },
             _onOpened: function onOpened() {
+                console.log("on typeahead opened (HINT)");
                 this._updateHint();
                 this.eventBus.trigger("opened");
             },
@@ -1419,13 +1432,11 @@
                 var query = this.input.getQuery();
                 this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorUp($e);
                 // console.log("Part 2: Typeahead - KeyUp");
-                // this.dropdown.open();
             },
             _onDownKeyed: function onDownKeyed(type, $e) {
                 var query = this.input.getQuery();
                 this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorDown($e);
                 // console.log("Part 2: Typeahead - KeyDown");
-                // this.dropdown.open();
             },
         // var online,
         //   _this = this;
@@ -1445,7 +1456,9 @@
 
             _onQueryChanged: function onQueryChanged(e, query) {
                 this.input.clearHintIfInvalid();
+                console.log("Part 1 - query changed");
                 if (query.length >= this.minLength) {                                           // TYPEAHEAD
+                    console.log("Part 2 - dropdown updated");
                     this.dropdown.update(query)
                 } else {
                     this.dropdown.empty();
@@ -1460,10 +1473,12 @@
                 }
             },
             _onWhitespaceChanged: function onWhitespaceChanged() {
+                // console.log("on whitespace changed (HINT) (OPEN)");
                 this._updateHint();
                 this.dropdown.open();
             },
             _updateHint: function updateHint() {
+                console.log("Part 4 - update hint");
                 var datum, val, query, escapedQuery, frontMatchRegEx, match;
                 datum = this.dropdown.getDatumForTopSuggestion();
                 if (datum && this.dropdown.isVisible() && !this.input.hasOverflow()) {
@@ -1472,7 +1487,6 @@
                     escapedQuery = _.escapeRegExChars(query);
                     frontMatchRegEx = new RegExp("^(?:" + escapedQuery + ")(.+$)", "i");
                     match = frontMatchRegEx.exec(datum.value);
-                    console.log(match);
                     if (match) {
                         preHint = this.input.preTitle+val;
                         this.input.setHint(preHint + match[1])
@@ -1482,6 +1496,13 @@
                 } else {
                     this.input.clearHint();
                 }
+                // function preWidth() {
+                //     fullWidth = this.input.$hint[0].offsetWidth;
+                //     postWidth = this.dropdown.$menu.find("p")[0].offsetWidth;
+                //     preWidth = fullWidth - postWidth;
+                //     console.log("(HINT) preWidth:", preWidth, "fullWidth:", fullWidth, "postWidth:", postWidth);
+                //     return preWidth;
+                // }
             },
             _autocomplete: function autocomplete(event) {
                 var hint, query, isCursorAtEnd, datum;
@@ -1511,7 +1532,24 @@
                 e && e.preventDefault();
                 e && e.stopPropagation();
             },
+            _setPreWidth: function setPreWidth() {
+                console.log("preTitle:", this.input.preTitle);
+                // use the jQuery hack to find its proper length,
+                //rather than doing this weird math
+                typehound = $(document.createElement('span')).text(this.input.preTitle);
+                typehound.addClass("typehound").appendTo("#message-region");
+                preWidth = typehound.width();
+                if (preWidth > 0) {preWidth += 4;} // to account for the extra space
+                typehound.remove();
+                // fullWidth = this.input.$hint[0].offsetWidth;
+                // postWidth = this.dropdown.$menu.find("p")[0].offsetWidth;
+                // preWidth = fullWidth - postWidth;
+                // , "fullWidth:", fullWidth, "postWidth:", postWidth
+                console.log("(HINT) preWidth:", preWidth);
+                this.dropdown.preWidth = preWidth;
+            },
             open: function open() {
+                console.log("on typeahead open (OPEN)");
                 this.dropdown.open();
             },
             close: function close() {
@@ -1609,7 +1647,6 @@
             },
             close: function close() {
                 return this.each(closeTypeahead);
-                console.log("here at old?");
                 function closeTypeahead() {
                     var $input = $(this), typeahead;
                     if (typeahead = $input.data(typeaheadKey)) {
