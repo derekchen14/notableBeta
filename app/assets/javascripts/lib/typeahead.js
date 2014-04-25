@@ -857,6 +857,7 @@
             onKeydown = _.bind(this._onKeydown, this);
             onInput = _.bind(this._onInput, this);
             this.preTitle = "";
+            this.zoomLevel = "";
             this.$hint = $(o.hint);
             this.$input = $(o.input).on("blur.tt", onBlur).on("focus.tt", onFocus).on("keydown.tt", onKeydown);
             if (this.$hint.length === 0) {
@@ -881,12 +882,12 @@
             return (str || "").replace(/^\s*/g, "").replace(/\s{2,}/g, " ");
         };
         _.mixin(Input.prototype, EventEmitter, {
-            // _onBlur: function onBlur() {
-            //     // this.resetInputValue();
-            //     this.setInputValue(this.query, true);
-            //     console.log("Part 4: Input - Blur");
-            //     this.trigger("blurred");
-            // },
+            _onBlur: function onBlur() {
+                // this.resetInputValue();
+                // this.setInputValue(this.query, true);
+                // console.log("Part 4: Input - Blur");
+                this.trigger("blurred");
+            },
             _onFocus: function onFocus() {
                 this.trigger("focused");
             },
@@ -959,6 +960,15 @@
                 startIndex = title.trim().lastIndexOf(" ")+1;
                 endIndex = title.trim().length;
                 this.preTitle = title.slice(0,startIndex);
+
+                inputClasses = this.$input[0].parentElement.parentElement.classList
+                // console.log(inputClasses);
+                console.log(inputClasses.contains("root"));
+                if (inputClasses.contains("root")) {
+                    this.zoomLevel = "root";
+                } else {
+                    this.zoomLevel = "";
+                }
                 return title.slice(startIndex, endIndex);
             },
             setInputValue: function setInputValue(value, silent) {
@@ -1537,7 +1547,8 @@
                 // use the jQuery hack to find its proper length,
                 //rather than doing this weird math
                 typehound = $(document.createElement('span')).text(this.input.preTitle);
-                typehound.addClass("typehound").appendTo("#message-region");
+                typehound.addClass("typehound").appendTo("#links-region");
+                if (this.input.zoomLevel === "root") {typehound.addClass("root");}
                 preWidth = typehound.width();
                 if (preWidth > 0) {preWidth += 4;} // to account for the extra space
                 typehound.remove();

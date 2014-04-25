@@ -103,7 +103,9 @@
 	}
 
 	.typehound {
-		color: transparent;
+		color: red;
+		// color: transparent;
+		&.root { font-size: 1.05em; }
 	}
 
 
