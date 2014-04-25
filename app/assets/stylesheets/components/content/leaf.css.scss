@@ -103,8 +103,10 @@
 	}
 
 	.typehound {
-		color: red;
-		// color: transparent;
+		color: transparent;
+		font-family: 'Lucida Grande', 'Lucida Sans Unicode', Arial, sans-serif;
+		font-size: 14px;
+		letter-spacing: -0.3px;
 		&.root { font-size: 1.05em; }
 	}
 

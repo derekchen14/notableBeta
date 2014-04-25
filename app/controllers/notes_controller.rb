@@ -71,7 +71,6 @@ class NotesController < ApplicationController
   private
     def getWords(note)
       content = note.gsub(/&nbsp;|\?|\!|\.|,/, ' ')
-      puts "Content: #{content}"
       newWords = content.gsub(/\s+/, ' ').strip.split(" ")
       newWords.delete_if { |word| word.match /\W/ }
       newWords.delete_if { |word| word.length < 6 }
@@ -79,8 +78,6 @@ class NotesController < ApplicationController
     end
 
     def getWordDiff(newWords, currentWords)
-      puts "newWords: #{newWords}"
-      puts "currentWords: #{currentWords}"
       return if newWords == currentWords
       incr = newWords - currentWords
       decr = currentWords - newWords
@@ -90,11 +87,20 @@ class NotesController < ApplicationController
     end
 
     def add_to_library(words)
-      words.each { |word| $redis.hincrby "Notebook:#{@note.notebook_id}", word, 1 }
+      words.each do |word|
+        unless prepopulated_words.include?(word)
+          $redis.hincrby "Notebook:#{@note.notebook_id}", word, 1
+        end
+      end
     end
 
     def remove_from_library(words)
       words.each { |word| $redis.hincrby "Notebook:#{@note.notebook_id}", word, -1 }
+    end
+
+    def prepopulated_words
+      %w[sophomore achieve apparent calendar congratulate desperate receive ignorance
+        judgment conscious February definition]
     end
 
 end

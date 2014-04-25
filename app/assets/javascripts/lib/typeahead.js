@@ -885,7 +885,6 @@
             _onBlur: function onBlur() {
                 // this.resetInputValue();
                 // this.setInputValue(this.query, true);
-                // console.log("Part 4: Input - Blur");
                 this.trigger("blurred");
             },
             _onFocus: function onFocus() {
@@ -962,8 +961,6 @@
                 this.preTitle = title.slice(0,startIndex);
 
                 inputClasses = this.$input[0].parentElement.parentElement.classList
-                // console.log(inputClasses);
-                console.log(inputClasses.contains("root"));
                 if (inputClasses.contains("root")) {
                     this.zoomLevel = "root";
                 } else {
@@ -1122,7 +1119,6 @@
                 this.query = query;
                 this.canceled = false;
                 this.source(query, render);
-                // console.log("Part 3: Dataset - Update");
                 function render(suggestions) {
                     if (!that.canceled && query === that.query) {
                         that._render(query, suggestions);
@@ -1198,9 +1194,6 @@
             },
             _onRendered: function onRendered() {
                 this.isEmpty = _.every(this.datasets, isDatasetEmpty);
-                // console.log("Show if false - render, isEmpty:", this.isEmpty);
-                // console.log("Show if true - render, isOpen:", this.isOpen);
-                console.log("Part 3 - dropdown rendered");
                 this.isEmpty ? this._hide() : this.isOpen && this._show();
                 this.trigger("datasetRendered");
                 function isDatasetEmpty(dataset) {
@@ -1211,14 +1204,16 @@
                 this.$menu.hide();
             },
             _show: function() {
-                console.log("(SHOW) outer", this.preWidth);
                 this.trigger("setPreWidth");
-                if (this.preWidth > 0) {
-                    console.log("show INNER");
-                    left = this.preWidth.toString()+"px";
-                    this.$menu.css("left", left);
+                if (this.preWidth > 750) {
+                    return
+                } else if (this._getSuggestions().length > 1) {
+                    if (this.preWidth > 0) {
+                        left = this.preWidth.toString()+"px";
+                        this.$menu.css("left", left);
+                    }
+                    this.$menu.css("display", "block");
                 }
-                this.$menu.css("display", "block");
             },
             _getSuggestions: function getSuggestions() {
                 return this.$menu.find(".tt-suggestion");
@@ -1279,8 +1274,6 @@
             open: function open() {
                 if (!this.isOpen) {
                     this.isOpen = true;
-                    console.log("Show if true - open, isPopulated:", !this.isEmpty);
-                    console.log("Part 4 - dropdown open");
                     !this.isEmpty && this._show();
                     this.trigger("opened");
                 }
@@ -1399,16 +1392,13 @@
                 this.eventBus.trigger("cursorchanged", datum.raw, datum.datasetName);
             },
             _onCursorRemoved: function onCursorRemoved() {
-                console.log("on cursor removed (HINT)");
                 this.input.resetInputValue();
                 this._updateHint();
             },
             _onDatasetRendered: function onDatasetRendered() {
-                console.log("on dataset rendered (HINT)");
                 this._updateHint();
             },
             _onOpened: function onOpened() {
-                console.log("on typeahead opened (HINT)");
                 this._updateHint();
                 this.eventBus.trigger("opened");
             },
@@ -1441,34 +1431,14 @@
             _onUpKeyed: function onUpKeyed(type, $e) {
                 var query = this.input.getQuery();
                 this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorUp($e);
-                // console.log("Part 2: Typeahead - KeyUp");
             },
             _onDownKeyed: function onDownKeyed(type, $e) {
                 var query = this.input.getQuery();
                 this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorDown($e);
-                // console.log("Part 2: Typeahead - KeyDown");
             },
-        // var online,
-        //   _this = this;
-        // online = App.Helper.ConnectionAPI.checkConnection;
-        // return $.when(online()).then((function() {
-        //   return _this.selectTrunk();
-        // }), (function() {
-        //   App.Notify.alert('preventNotebook', 'warning', {
-        //     destructTime: 9000
-        //   });
-        //   return App.Helper.eventManager.trigger("closeSidr");
-        // }));
-
-        // turn dropdown into a promise
-        // allow dropdown to handle Callbacks
-        // capture where dropdown triggers a event, and react accordingly
-
             _onQueryChanged: function onQueryChanged(e, query) {
                 this.input.clearHintIfInvalid();
-                console.log("Part 1 - query changed");
                 if (query.length >= this.minLength) {                                           // TYPEAHEAD
-                    console.log("Part 2 - dropdown updated");
                     this.dropdown.update(query)
                 } else {
                     this.dropdown.empty();
@@ -1483,12 +1453,10 @@
                 }
             },
             _onWhitespaceChanged: function onWhitespaceChanged() {
-                // console.log("on whitespace changed (HINT) (OPEN)");
                 this._updateHint();
                 this.dropdown.open();
             },
             _updateHint: function updateHint() {
-                console.log("Part 4 - update hint");
                 var datum, val, query, escapedQuery, frontMatchRegEx, match;
                 datum = this.dropdown.getDatumForTopSuggestion();
                 if (datum && this.dropdown.isVisible() && !this.input.hasOverflow()) {
@@ -1506,13 +1474,6 @@
                 } else {
                     this.input.clearHint();
                 }
-                // function preWidth() {
-                //     fullWidth = this.input.$hint[0].offsetWidth;
-                //     postWidth = this.dropdown.$menu.find("p")[0].offsetWidth;
-                //     preWidth = fullWidth - postWidth;
-                //     console.log("(HINT) preWidth:", preWidth, "fullWidth:", fullWidth, "postWidth:", postWidth);
-                //     return preWidth;
-                // }
             },
             _autocomplete: function autocomplete(event) {
                 var hint, query, isCursorAtEnd, datum;
@@ -1530,7 +1491,6 @@
                     _.defer(_.bind(this.dropdown.empty, this.dropdown));
                     event.preventDefault();
                     event.stopPropagation();
-                    // $e.stopImmediatePropagation();
                 }
             },
             _select: function select(datum, e) {
@@ -1543,24 +1503,15 @@
                 e && e.stopPropagation();
             },
             _setPreWidth: function setPreWidth() {
-                console.log("preTitle:", this.input.preTitle);
-                // use the jQuery hack to find its proper length,
-                //rather than doing this weird math
                 typehound = $(document.createElement('span')).text(this.input.preTitle);
                 typehound.addClass("typehound").appendTo("#links-region");
                 if (this.input.zoomLevel === "root") {typehound.addClass("root");}
                 preWidth = typehound.width();
                 if (preWidth > 0) {preWidth += 4;} // to account for the extra space
                 typehound.remove();
-                // fullWidth = this.input.$hint[0].offsetWidth;
-                // postWidth = this.dropdown.$menu.find("p")[0].offsetWidth;
-                // preWidth = fullWidth - postWidth;
-                // , "fullWidth:", fullWidth, "postWidth:", postWidth
-                console.log("(HINT) preWidth:", preWidth);
                 this.dropdown.preWidth = preWidth;
             },
             open: function open() {
-                console.log("on typeahead open (OPEN)");
                 this.dropdown.open();
             },
             close: function close() {
@@ -1573,7 +1524,6 @@
                     this.input.setQuery(val);
                     this.input.setInputValue(val, true);
                 }
-                // this._setLanguageDirection();
             },
             getVal: function getVal() {
                 return this.input.getQuery();
