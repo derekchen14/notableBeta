@@ -9,6 +9,7 @@ class SuggestionsController < ApplicationController
       words.each do |word, count|
         $redis.hdel "Notebook:#{notebook.id}", word if count.to_i <= 0
         @suggestions << {suggestion: word} if count.to_i >= 3
+        @suggestions = @suggestions.uniq
       end
     end
     respond_with @suggestions # send to bloodhound

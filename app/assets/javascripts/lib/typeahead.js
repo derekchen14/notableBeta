@@ -844,7 +844,10 @@
             27: "esc",
             13: "enter",
             38: "up",
-            40: "down"
+            40: "down",
+            49: "one",
+            50: "two",
+            51: "three"
         };
         function Input(o) {
             var that = this, onBlur, onFocus, onKeydown, onInput;
@@ -1372,7 +1375,7 @@
             this.input = new Input({
                 input: $input,
                 hint: $hint,
-            }).onSync("focused", this._onFocused, this).onSync("blurred", this._onBlurred, this).onSync("enterKeyed", this._onEnterKeyed, this).onSync("tabKeyed", this._onTabKeyed, this).onSync("escKeyed", this._onEscKeyed, this).onSync("upKeyed", this._onUpKeyed, this).onSync("downKeyed", this._onDownKeyed, this).onSync("queryChanged", this._onQueryChanged, this).onSync("whitespaceChanged", this._onWhitespaceChanged, this);
+            }).onSync("focused", this._onFocused, this).onSync("blurred", this._onBlurred, this).onSync("enterKeyed", this._onEnterKeyed, this).onSync("tabKeyed", this._onTabKeyed, this).onSync("escKeyed", this._onEscKeyed, this).onSync("upKeyed", this._onUpKeyed, this).onSync("downKeyed", this._onDownKeyed, this).onSync("oneKeyed", this._onOneKeyed, this).onSync("twoKeyed", this._onTwoKeyed, this).onSync("threeKeyed", this._onThreeKeyed, this).onSync("queryChanged", this._onQueryChanged, this).onSync("whitespaceChanged", this._onWhitespaceChanged, this);
             $input.bind('typeahead:selected', function() {
                 Notable.Helper.CursorPositionAPI.placeCursorAtEnd($input);
             }).bind('typeahead:autocompleted', function() {
@@ -1423,6 +1426,26 @@
             _onEnterKeyed: function onEnterKeyed(type, $e) {
                 var cursorDatum = this.dropdown.getDatumForCursor();
                 cursorDatum ? this._select(cursorDatum, $e) : this._autocomplete($e);
+            },
+            _onOneKeyed: function onOneKeyed(type, $e) {
+                var cursorDatum = this.dropdown._getSuggestions().eq(1);
+                var foo = this.dropdown.getDatumForSuggestion(cursorDatum);
+                var Datum = this.dropdown.getDatumForCursor();
+                console.log(foo);
+                console.log(Datum);
+                // $e.stopPropagation;
+                // var cursorDatum = this.dropdown.getDatumForCursor();
+                cursorDatum ? this._select(foo, $e) : this._autocomplete($e);
+            },
+            _onTwoKeyed: function onTwoKeyed(type, $e) {
+                var cursorDatum = this.dropdown._getSuggestions().eq(2);
+                var foo = this.dropdown.getDatumForSuggestion(cursorDatum);
+                cursorDatum ? this._select(foo, $e) : this._autocomplete($e);
+            },
+            _onThreeKeyed: function onThreeKeyed(type, $e) {
+                var cursorDatum = this.dropdown._getSuggestions().eq(3);
+                var foo = this.dropdown.getDatumForSuggestion(cursorDatum);
+                cursorDatum ? this._select(foo, $e) : this._autocomplete($e);
             },
             _onEscKeyed: function onEscKeyed() {
                 this.dropdown.close();
