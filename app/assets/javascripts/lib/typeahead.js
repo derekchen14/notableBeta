@@ -1215,6 +1215,7 @@
                         left = this.preWidth.toString()+"px";
                         this.$menu.css("left", left);
                     }
+                    this._getSuggestions().first().addClass("hidden");
                     this.$menu.css("display", "block");
                 }
             },
@@ -1238,8 +1239,21 @@
                 }
                 $oldCursor = this._getCursor();
                 $suggestions = this._getSuggestions();
+                oldPosition = $suggestions.index($oldCursor);
                 this._removeCursor();
-                newCursorIndex = $suggestions.index($oldCursor) + increment;
+                if (increment === "up") {
+                    if (oldPosition === 1) {
+                        newCursorIndex = oldPosition - 2;
+                    } else {
+                        newCursorIndex = oldPosition - 1;
+                    }
+                } else if (increment === "down") {
+                    if (oldPosition === -1) {
+                        newCursorIndex = oldPosition + 2;
+                    } else {
+                        newCursorIndex = oldPosition + 1;
+                    }
+                }
                 newCursorIndex = (newCursorIndex + 1) % ($suggestions.length + 1) - 1;
                 if (newCursorIndex === -1) {
                     this.trigger("cursorRemoved");
@@ -1282,10 +1296,10 @@
                 }
             },
             moveCursorUp: function moveCursorUp(e) {
-                this._moveCursor(-1, e);
+                this._moveCursor("up", e);
             },
             moveCursorDown: function moveCursorDown(e) {
-                this._moveCursor(+1, e);
+                this._moveCursor("down", e);
             },
             getDatumForSuggestion: function getDatumForSuggestion($el) {
                 var datum = null;

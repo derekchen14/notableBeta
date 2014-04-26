@@ -18,7 +18,7 @@
 
 		startBloodhound: (id) ->
 			@engine = new Bloodhound
-				limit: 5
+				limit: 4
 				local: [{suggestion: "sophomore"}, {suggestion: "achieve"}, {suggestion: "apparent"},
 					{suggestion: "calendar"}, {suggestion: "congratulate"}, {suggestion: "desperate"},
 					{suggestion: "receive"}, {suggestion: "ignorance"}, {suggestion: "judgment"},
