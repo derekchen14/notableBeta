@@ -16,6 +16,7 @@ gem 'bootstrap_form'
 gem 'evernote_oauth'
 gem "figaro"
 gem 'bcrypt-ruby', '~> 3.1.0'
+gem 'filepicker-rails'
 
 group :development, :test do
   gem 'quiet_assets'

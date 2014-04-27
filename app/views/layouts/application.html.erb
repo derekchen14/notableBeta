@@ -8,6 +8,7 @@
   <%= favicon_link_tag 'logo/favicon.png' %>
   <%= analytics_init if Rails.env.production? %>
   <%= render 'layouts/mixpanel' if Rails.env.production? %>
+  <%= filepicker_js_include_tag %>
   <%= csrf_meta_tags %>
 </head>
 <body>
