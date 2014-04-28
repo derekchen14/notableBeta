@@ -567,6 +567,9 @@
 		attachFile: (e) ->
 			$(".crown-attach").toggleClass('hidden')
 			@$(".icon-leaves-attach").toggleClass('selected')
+			filepicker.setKey("AsJRTD9qQfyTSHqSr3VGAz")
+			filepicker.pick (InkBlob) ->
+				console.log InkBlob.url
 		selectEmoticon: ->
 			@$(".icon-leaves-emoticon").toggleClass('selected')
 		exportParagraph: ->
