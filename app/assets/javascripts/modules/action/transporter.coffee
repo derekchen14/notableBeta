@@ -17,7 +17,14 @@
 				error: =>
 					@notifyFailure forceBackoff
 		notifyFailure: (forceBackoff) ->
-			App.Notify.alert 'connectionLost', 'danger', {destructTime: 14000, count: @backoffCount}
+			timeToRetry = Action.Helpers.fibonacci(@backoffCount)
+			console.log timeToRetry
+			if timeToRetry < 5 							# 1,1,2,3
+				App.Notify.alert 'connectionLost', 'danger', {destructTime: 14000}
+			else if timeToRetry < 140 			# 5,8,13,21,34,55,89
+				App.Notify.alert 'connectionRetry', 'danger', {retryTime: timeToRetry}
+			else														# 144
+				App.Notify.alert 'connectionAttempt', 'danger'
 			@backoff() if @isOnline() or forceBackoff
 
 		# ------------ Back off methods ------------

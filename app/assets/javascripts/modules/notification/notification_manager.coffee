@@ -38,7 +38,8 @@
 			<a href='learn'>Learn More</a>"
 		# Internet
 		connectionLost: "Connection has been lost."
-		connectionAttempt: "Trying to reconnect in 10 seconds."
+		connectionRetry: "Trying to reconnect in 10 seconds."
+		connectionAttempt: "Will continue trying to reconnect every two minutes."
 		connectionFound: "We're back online!"
 		# Notebook
 		needsNotebook: "Your account needs to have at least one notebook."
@@ -74,7 +75,7 @@
 
 	_customMessage = (retryTime, message) ->
 		switch message
-			when "connectionAttempt" then "Trying to reconnect in #{retryTime} seconds."
+			when "connectionRetry" then "Trying to reconnect in #{retryTime} seconds."
 			when "evernoteRateLimit" then "Evernote usage has been temporarily exceeded. Please try again in #{Math.floor(retryTime/60)+1} minutes. <a href='learn#limits'>Learn More</a>"
 			else "Try again in #{retryTime} minutes."
 
