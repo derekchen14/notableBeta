@@ -499,8 +499,11 @@
 		events: ->
 			"blur .note-content": "updateNote"
 			"keydown .note-content": @model.timeoutAndSave
-			"click .icon-leaves-share": @export false
-			"click .icon-leaves-export": @export true
+			"click .icon-leaves-tag": "displayTags"
+			"click .icon-leaves-share": "shareNote"
+			"click .icon-leaves-attach": "attachFile"
+			"click .icon-leaves-export": "exportParagraph"
+			"click .icon-leaves-emoticon": "selectEmoticon"
 			"click .icon-leaves-delete": "deleteBranch"
 
 		initialize: ->
@@ -512,7 +515,6 @@
 			@$el.on 'keydown', null, 'up', @setCursor.bind @
 			@$el.on 'keydown', null, 'down', @jumpFocusDown.bind @
 			@$el.on 'keydown', null, 'right', @arrowRightJumpLine.bind @
-			# @$el.on 'keydown', null, 'right', @jumpFocusDown
 			@$el.on 'keydown', null, 'alt+ctrl+left', @zoomOut.bind @
 			@$el.on 'keydown', null, 'ctrl+shift+backspace', @deleteBranch.bind @
 		onClose: ->
@@ -558,6 +560,17 @@
 			if @cursorApi.isEmptyAfterCursor window.getSelection(), @getNoteTitle()
 				@jumpFocusDown e
 
+		displayTags: ->
+			@$(".icon-leaves-tag").toggleClass('selected')
+		shareNote: ->
+			Note.eventManager.trigger "render:export", @model, false
+		attachFile: (e) ->
+			$(".crown-attach").toggleClass('hidden')
+			@$(".icon-leaves-attach").toggleClass('selected')
+		selectEmoticon: ->
+			@$(".icon-leaves-emoticon").toggleClass('selected')
+		exportParagraph: ->
+			Note.eventManager.trigger "render:export", @model, true
 		deleteBranch: (e) ->
 			@zoomOut(e)
 			App.Note.tree.deleteNote @model
@@ -574,8 +587,5 @@
 			Backbone.history.navigate "#/#{guid}"
 		clearZoom: ->
 			Note.eventManager.trigger "clearZoom"
-
-		export: (paragraph = false) -> (e) ->
-			Note.eventManager.trigger "render:export", @model, paragraph
 
 )

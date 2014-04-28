@@ -31,6 +31,7 @@
 				}
 				&:hover { color: $notableYellow; }
 				&:active { color: $notableOrange; }
+				&.selected { color: $notableBlue; }
 			}
 		}
 	}

@@ -70,5 +70,8 @@ module Notable
     # Prevent Notable from accessing Postgres or loading models when
     # precompiling assets for Heroku deployment
     config.assets.initialize_on_precompile = false
-  end
+
+    # Configure filepicker settings to connect to their API
+    config.filepicker_rails.api_key = ENV["FILEPICKER_KEY"]
+    config.filepicker_rails.secret_key = ENV["FILEPICKER_SECRET"]  end
 end
