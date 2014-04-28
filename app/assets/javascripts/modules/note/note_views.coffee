@@ -506,6 +506,8 @@
 			"click .icon-leaves-emoticon": "selectEmoticon"
 			"click .icon-leaves-delete": "deleteBranch"
 
+			"click .attach-btn": "attachBtn"
+
 		initialize: ->
 			@cursorApi = App.Helper.CursorPositionAPI
 			Note.eventManager.on "timeoutUpdate:#{@model.get('guid')}", @updateNote, @
@@ -567,6 +569,7 @@
 		attachFile: (e) ->
 			$(".crown-attach").toggleClass('hidden')
 			@$(".icon-leaves-attach").toggleClass('selected')
+		attachBtn: ->
 			filepicker.setKey("AsJRTD9qQfyTSHqSr3VGAz")
 			filepicker.pick (InkBlob) ->
 				console.log InkBlob.url

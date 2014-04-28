@@ -33,6 +33,19 @@
 				&:active { color: $notableOrange; }
 				&.selected { color: $notableBlue; }
 			}
+			.attach-drop {
+				border: 1px dashed $gray;
+				display: inline;
+				margin: 0;
+				border-radius: 3px;
+				background-color: rgb(243, 243, 243);
+				color: rgb(51, 51, 51);
+				font-size: 12px;
+				line-height: 22px;
+				padding: 2px 4px;
+				vertical-align: middle;
+				overflow: hidden;
+			}
 		}
 	}
 
