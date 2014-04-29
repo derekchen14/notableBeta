@@ -4,7 +4,8 @@
 // ----------------MOBILE FIRST CSS -------------------
 // ----------------------------------------------------
 
-#crown {
+#leaf-region {
+	display: inline;
 }
 
 .bullet {
@@ -14,8 +15,8 @@
 // ---------------TABLET MEDIA QUERIES ----------------
 // ----------------------------------------------------
 @media (min-width: $screen-sm) {
-	#crown {
-		.leaves {
+	#leaf-region {
+		#leaves {
 			font-size: 23px;
 			padding-left: 0;
 			margin-top: -4px;
@@ -78,8 +79,8 @@
 // --------------LAPTOP MEDIA QUERIES -----------------
 // ----------------------------------------------------
 @media (min-width: $screen-md) {
-	#crown {
-		.leaves {
+	#leaf-region {
+		#leaves {
 			font-size: 27px;
 			text-align: right;
 			padding-right: 12px;

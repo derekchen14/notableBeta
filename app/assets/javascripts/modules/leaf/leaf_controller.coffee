@@ -13,10 +13,8 @@
 				@startBloodhound(notebook_id)
 		setGlobals: ->
 			filepicker.setKey("AsJRTD9qQfyTSHqSr3VGAz")
-			console.log "key is set"
 		setEvents: ->
 			@eventManager.on "typeahead:attach", @attachTypeahead, @
-			# @eventManager.on "pushProgress", @progressView.pushProgress, @
 
 		startBloodhound: (id) ->
 			@engine = new Bloodhound

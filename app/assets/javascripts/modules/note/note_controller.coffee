@@ -97,12 +97,17 @@
 
 		# Crown
 		showCrownView: ->
-				@crownView = new App.Note.CrownView(model: App.Note.activeBranch)
-				App.contentRegion.currentView.crownRegion.show @crownView
+			@crownView = new App.Note.CrownView(model: App.Note.activeBranch)
+			App.contentRegion.currentView.crownRegion.show @crownView
+			@leafView = new App.Leaf.LeafView
+			App.contentRegion.currentView.crownRegion.currentView.leafRegion.show @leafView
 		clearCrownView: ->
 			if @crownView?
 				@crownView.close()
 				delete @crownView
+			if @leafView?
+				@leafView.close()
+				delete @leafView
 			App.Note.activeBranch = "root"
 			App.Note.activeTree = App.Note.tree
 

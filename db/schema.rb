@@ -11,7 +11,20 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140426231552) do
+ActiveRecord::Schema.define(:version => 20140429144902) do
+
+  create_table "leaves", :force => true do |t|
+    t.string   "attachment"
+    t.string   "color"
+    t.string   "emoticon"
+    t.string   "eng"
+    t.string   "usn"
+    t.integer  "note_id"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "leaves", ["note_id"], :name => "index_leaves_on_note_id"
 
   create_table "notebooks", :force => true do |t|
     t.string   "title"
@@ -39,7 +52,6 @@ ActiveRecord::Schema.define(:version => 20140426231552) do
     t.integer  "notebook_id"
     t.boolean  "trashed",     :default => false
     t.integer  "usn"
-    t.string   "attachment"
   end
 
   create_table "users", :force => true do |t|
