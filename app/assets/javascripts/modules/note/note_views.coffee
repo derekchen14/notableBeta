@@ -497,7 +497,7 @@
 			leafRegion: "#leaf-region"
 		ui:
 			noteContent: ".note-content"
-			leaves: "span.leaves"
+			leaves: "span#leaves"
 		events: ->
 			"blur .note-content": "updateNote"
 			"keydown .note-content": @model.timeoutAndSave
@@ -560,7 +560,7 @@
 
 		displayLeaf: (e) ->
 			$(e.currentTarget).toggleClass('selected')
-			@ui.leaves.toggleClass("grow")
+			$("span#leaves").toggleClass("grow")
 			@ui.noteContent.toggleClass("shrink")
 		deleteBranch: (e) ->
 			@zoomOut(e)

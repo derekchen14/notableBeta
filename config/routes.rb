@@ -1,6 +1,7 @@
 Notable::Application.routes.draw do
   devise_for :users, :module => "users", :path => ''
 
+  resources :leaves
   resources :notes
   resources :notebooks
   resources :suggestions

@@ -3,7 +3,7 @@ class Note < ActiveRecord::Base
   attr_accessible :guid, :eng, :title, :subtitle, :parent_id, :rank, :depth,
     :collapsed, :fresh, :trashed, :notebook_id, :usn
   validates_presence_of :guid, :rank, :depth
-  has_one :leaf, dependent: :destroy
+  # has_one :leaf, dependent: :destroy
   belongs_to :notebook
 
   include PgSearch

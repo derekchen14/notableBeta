@@ -42,17 +42,23 @@
 				border: 2px solid $grayLight;
 				border-top-right-radius: 12px;
 				border-bottom-right-radius: 12px;
-				padding: 0 4px 4px 0;
+				padding: 0 8px 0 3px;
 				border-left: none;
+				// margin-right: 10px;
+				height: 34px;
+				display: inline-block;
+				position: relative;
+				bottom: 7px;
 				.attach-drop {
+					cursor: default;
 					border: 1px dashed $gray;
 					margin: 0 0 0 1px;
 					border-radius: 3px;
 					background-color: rgb(243, 243, 243);
 					color: rgb(51, 51, 51);
 					font-size: 12px;
-					padding: 4px 5px;
-					vertical-align: middle;
+					padding: 4px 7px;
+					// vertical-align: middle;
 					&.over { border: 1px solid $grayDark; }
 				}
 				.attach-btn {
@@ -61,8 +67,7 @@
 					border: none;
 					border-radius: 3px;
 					padding: 3px 6px;
-					vertical-align: middle;
-					cursor: default;
+					// vertical-align: middle;
 					// position: relative;
 					// bottom: 2px;
 				}

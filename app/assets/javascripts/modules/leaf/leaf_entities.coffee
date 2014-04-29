@@ -1,21 +1,15 @@
 @Notable.module "Leaf", (Leaf, App, Backbone, Marionette, $, _) ->
-	class Leaf.AttachView extends Marionette.ItemView
-		id: "attach"
-		template: "leaf/attach"
-
-		events: ->
-			"click .glyphicon-remove": "clearExport"
-
-		initialize: (options) ->
-			@model = new Leaf.AttachModel tree: @collection, inParagraph: options.inParagraph, title: options.title
-			if options.inParagraph then App.Notify.alert 'exportParagraph', 'success'
-			else App.Notify.alert 'exportPlain', 'success'
-
-		clearExport: ->
-			App.Note.eventManager.trigger "clear:export"
 
 	class Leaf.AttachModel extends Backbone.Model
-		urlRoot : '/attach'
+		urlRoot : '/leaves'
+		defaults:
+			notificationType: 'save-notification'
+			notificationMessage: ''
+			selfDestruct: true
+			destructTime: 7000
+
+	class Leaf.ExportModel extends Backbone.Model
+		urlRoot : '/leaves'
 
 		initialize: ->
 			if @get('inParagraph') then @render = @renderTreeParagraph else @render = @renderTree
