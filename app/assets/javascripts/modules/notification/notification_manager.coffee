@@ -57,6 +57,9 @@
 		exportParagraph: "Your notes are ready for export in paragraph form."
 		brokenTree: "Sorry, something just broke. Your notebook will attempt to reset in a few seconds."
 
+		#Leaves
+		attachError: "There was an error attaching the file to your note."
+
 	@alert = (message, type, options) ->
 		throw "invalid notification message" unless _notificationMessages[message]?
 		throw "invalid notification type" unless _notificationTypes[type]?

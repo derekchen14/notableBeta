@@ -496,17 +496,20 @@
 
 		ui:
 			noteContent: ".note-content"
+			leaves: "span.leaves"
 		events: ->
 			"blur .note-content": "updateNote"
 			"keydown .note-content": @model.timeoutAndSave
 			"click .icon-leaves-tag": "displayTags"
 			"click .icon-leaves-share": "shareNote"
-			"click .icon-leaves-attach": "attachFile"
+			"click .icon-leaves-attach": "displayAttach"
 			"click .icon-leaves-export": "exportParagraph"
-			"click .icon-leaves-emoticon": "selectEmoticon"
+			"click .icon-leaves-emoticon": "displayEmoticon"
 			"click .icon-leaves-delete": "deleteBranch"
 
-			"click .attach-btn": "attachBtn"
+			"click .tag-btn": "addTag"
+			"click .attach-btn": "attachFile"
+			"click .emoticon-btn": "selectEmoticon"
 
 		initialize: ->
 			@cursorApi = App.Helper.CursorPositionAPI
@@ -564,16 +567,15 @@
 
 		displayTags: ->
 			@$(".icon-leaves-tag").toggleClass('selected')
-		shareNote: ->
+		displayShare: ->
 			Note.eventManager.trigger "render:export", @model, false
-		attachFile: (e) ->
+		displayAttach: ->
 			$(".crown-attach").toggleClass('hidden')
 			@$(".icon-leaves-attach").toggleClass('selected')
-		attachBtn: ->
-			filepicker.setKey("AsJRTD9qQfyTSHqSr3VGAz")
-			filepicker.pick (InkBlob) ->
-				console.log InkBlob.url
-		selectEmoticon: ->
+			@ui.leaves.toggleClass("grow")
+			@ui.noteContent.toggleClass("shrink")
+			@createDropTarget()
+		displayEmoticon: ->
 			@$(".icon-leaves-emoticon").toggleClass('selected')
 		exportParagraph: ->
 			Note.eventManager.trigger "render:export", @model, true
@@ -581,6 +583,38 @@
 			@zoomOut(e)
 			App.Note.tree.deleteNote @model
 
+		createDropTarget: ->
+			filepicker.makeDropPane $(".attach-drop")[0],
+				extensions: [
+					".pdf", ".ppt", ".pptx", ".doc", ".docx", ".png", ".gif", ".jpeg"
+				]
+				dragEnter: ->
+					$(".attach-drop").addClass("over")
+				dragLeave: ->
+					$(".attach-drop").removeClass("over")
+				onSuccess: (blob) ->
+					console.log JSON.stringify(blob)
+				onError: (type, message) ->
+					console.log type+" : "+message
+				services: "COMPUTER"
+				maxSize: 5242880 # 5MB
+		shareNote: ->
+			filepicker.exportFile 'https://d3urzlae3olibs.cloudfront.net/f71d50e/img/success.png'
+				mimetype:"image/png"
+			, (InkBlob) ->
+					console.log(InkBlob.url)
+		attachFile: ->
+			filepicker.setKey("AsJRTD9qQfyTSHqSr3VGAz")
+			filepicker.pick
+				extensions: [
+					".pdf", ".ppt", ".pptx", ".doc", ".docx", ".png", ".gif", ".jpeg"
+				]
+				services: "COMPUTER"
+				maxSize: 5242880 # 5MB
+			, ((InkBlob) ->
+				console.log JSON.stringify(InkBlob)
+			), (FPError) ->
+				console.log FPError.toString()
 		zoomOut: (e) ->
 			e.preventDefault()
 			e.stopPropagation()

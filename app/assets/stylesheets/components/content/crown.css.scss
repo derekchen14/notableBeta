@@ -125,6 +125,12 @@
 		.note-content {
 			outline: none;
 			padding-right: 5px;
+			&.shrink {
+				width: 45%;
+				overflow: hidden;
+				height: 1em;
+				display: inline-block;
+			}
 		}
 	}
 }
