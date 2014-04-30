@@ -51,7 +51,7 @@
 			$("#crown, #tree").css("border-color", "#EAEAEA")
 			$("body, nav").css("background-color", "#EAEAEA")
 			$("body").css("background-image", "url(/assets/satinweave.png)")
-			$(".leaves").css("color", "#3D3D3D")
+			$("#leaves").css("color", "#3D3D3D")
 			$("#content-template h3").css("color", "#989898")
 			$("#content-template .breadcrumb>li.root-breadcrumb a").css("color", "#989898")
 			$("nav").css(
@@ -74,7 +74,7 @@
 				$("body, nav").css("background", "#FDFDFD")
 				$("#crown, #tree").css("border-color", "#FDFDFD")
 				$("body").css("background-image", "none")
-				$(".leaves").css("color", "#FDFDFD")
+				$("#leaves").css("color", "#FDFDFD")
 				$("#content-template").css(
 					"background-image": "none"
 					"border-color": "#FDFDFD"
@@ -90,7 +90,7 @@
 			if @userIdle
 				$("#content-template .breadcrumb>li.root-breadcrumb a").css("color", "#FDFDFD")
 				$("#content-template h3").css("color", "#FDFDFD")
-				$(".leaves").css("color", "#FDFDFD")
+				$("#leaves").css("color", "#FDFDFD")
 				$(".icon-leaves-delete").hide()
 				$("#crown, #tree").css("border-color", "#FDFDFD")
 
