@@ -6,7 +6,7 @@ class LeavesController < ApplicationController
     # unless current_user.active_leaf?
     #   view_context.make_default_leaf
     # end
-    @leaves = Leaf.first
+    @leaves = Leaf.all
     respond_with(@leaves)
   end
 
