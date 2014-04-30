@@ -10,6 +10,7 @@
 
 		events: ->
 			"click .icon-leaves-attach": "displayAttach"
+			# "click .icon-leaves-tag": "addTag"
 
 			"click .add-tag-btn": "addTag"
 			"click .icon-leaves-share": "shareNote"
@@ -40,8 +41,11 @@
 				]
 				services: "COMPUTER"
 				maxSize: 5242880 # 5MB
-			, ((InkBlob) ->
-				console.log JSON.stringify(InkBlob)
+			, ((InkBlob) =>
+				@model.save
+					attachment: InkBlob.url
+					note_id: App.Note.activeBranch.attributes.id
+				console.log "succcess!"
 			), (FPError) ->
 				console.log FPError.toString()
 		exportParagraph: ->
@@ -61,9 +65,10 @@
 				onProgress: (percentage) =>
 					@ui.attach.text "Uploading ("+percentage+"%)"
 				onSuccess: (InkBlob) =>
-					console.log JSON.stringify(InkBlob)
-					@ui.attach.text "Drop file here -or- "
-					@ui.attach.removeClass("over")
+					@model.save
+						attachment: InkBlob.url
+						note_id: App.Note.activeBranch.attributes.id
+					console.log "succcess!"
 				onError: (type, message) ->
 					console.log type+" : "+message
 				services: "COMPUTER"

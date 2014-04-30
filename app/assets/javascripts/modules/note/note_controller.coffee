@@ -15,6 +15,7 @@
 		initialize: (options) ->
 			@allNotesByDepth = new App.Note.Collection()
 			@tree = new App.Note.Tree()
+			@leafModel = new App.Leaf.LeafModel()
 			@setGlobals()
 			@setEvents()
 		start: ->
@@ -37,6 +38,7 @@
 			Note.tree = @tree
 			Note.activeTree = @tree
 			Note.activeBranch = "root"
+			Note.leaf = @leafModel
 		setEvents: ->
 			Note.eventManager.on "clearZoom", @clearZoom, @
 			Note.eventManager.on "render:export", @showExportView, @
@@ -99,7 +101,7 @@
 		showCrownView: ->
 			@crownView = new App.Note.CrownView(model: App.Note.activeBranch)
 			App.contentRegion.currentView.crownRegion.show @crownView
-			@leafView = new App.Leaf.LeafView
+			@leafView = new App.Leaf.LeafView(model: App.Note.leaf)
 			App.contentRegion.currentView.crownRegion.currentView.leafRegion.show @leafView
 		clearCrownView: ->
 			if @crownView?

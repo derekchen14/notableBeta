@@ -1,12 +1,15 @@
 @Notable.module "Leaf", (Leaf, App, Backbone, Marionette, $, _) ->
 
-	class Leaf.AttachModel extends Backbone.Model
-		urlRoot : '/leaves'
+	class Leaf.LeafModel extends Backbone.Model
+		urlRoot: '/leaves'
 		defaults:
-			notificationType: 'save-notification'
-			notificationMessage: ''
-			selfDestruct: true
-			destructTime: 7000
+			attachment: ""
+			color: "black"
+			emoticon: "none"
+
+	# class Leaf.LeafCollection extends Backbone.Collection
+	# 	url: '/leaves'
+	# 	model: Leaf.LeafModel
 
 	class Leaf.ExportModel extends Backbone.Model
 		urlRoot : '/leaves'
