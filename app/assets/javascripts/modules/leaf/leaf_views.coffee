@@ -38,21 +38,18 @@
 		attachFile: ->
 			filepicker.pick
 				extensions: [
-					".pdf", ".ppt", ".pptx", ".doc", ".docx", ".png", ".gif", ".jpeg"
+					".pdf", ".ppt", ".pptx", ".doc", ".docx", ".png", ".gif", ".jpg"
 				]
 				services: "COMPUTER"
 				maxSize: 5242880 # 5MB
 			, ((InkBlob) =>
 				@model.save
-					attachment: InkBlob.url
-					# attach_url: InkBlob.url
-					# filename: InkBlob.filename
-					# mimetype: InkBlob.mimetype
-					# attach_size: InkBlob.size
+					attach_url: InkBlob.url
+					filename: InkBlob.filename
+					mimetype: InkBlob.mimetype
+					attach_size: InkBlob.size
 					note_id: App.Note.activeBranch.attributes.id
-				@ui.attach.removeClass("over")
-				$('.crown-attach').hide()
-				App.Notify.alert 'attachSuccess', 'success'
+				@postPickProcessing(InkBlob)
 			), (FPError) ->
 				console.log FPError.toString()
 				App.Notify.alert 'attachError', 'warning'
@@ -64,28 +61,54 @@
 		createDropTarget: ->
 			filepicker.makeDropPane $(".attach-drop")[0],
 				extensions: [
-					".pdf", ".ppt", ".pptx", ".doc", ".docx", ".png", ".gif", ".jpeg"
+					".pdf", ".ppt", ".pptx", ".doc", ".docx", ".png", ".gif", ".jpg"
 				]
 				maxSize: 5242880 # 5MB
 				dragEnter: =>
 					@ui.attach.addClass("over") # make something turn yellow
 				dragLeave: =>
-					@ui.attach.removeClass("over") # should also occur onSuccess
+					@ui.attach.removeClass("over")
 				onProgress: (percentage) =>
 					@ui.attach.text "Uploading ("+percentage+"%)"
 				onSuccess: (InkBlob) =>
 					@model.save
-						attachment: InkBlob[0].url
-						# attach_url: InkBlob.url
-						# filename: InkBlob.filename
-						# mimetype: InkBlob.mimetype
-						# attach_size: InkBlob.size
+						attach_url: InkBlob[0].url
+						filename: InkBlob[0].filename
+						mimetype: InkBlob[0].mimetype
+						attach_size: InkBlob[0].size
 						note_id: App.Note.activeBranch.attributes.id
-					@ui.attach.removeClass("over")
-					$('.crown-attach').hide()
-					App.Notify.alert 'attachSuccess', 'success'
+					@postPickProcessing(InkBlob[0])
 				onError: (type, message) ->
 					console.log type+" : "+message
+					App.Notify.alert 'attachError', 'warning'
+		postPickProcessing: (InkBlob) ->
+			@ui.attach.removeClass("over")
+			$('.crown-attach').hide()
+			App.Note.eventManager.trigger "concealLeaf"
+			type = @fileType(InkBlob.mimetype)
+			console.log type
+			@pickNotification(type)
+			@displayFile(type)
+		fileType: (mimetype) ->
+			front = mimetype.slice(0,3)
+			back = mimetype.slice(-3)
+			if front is "ima"
+				return "image"
+			else if back is "pdf"
+				return "PDF"
+			else if back is "ord" or back is "ent"
+				return "Word Doc"
+			else if back is "int" or back is "ion"
+				return "PowerPoint"
+			else
+				App.Notify.alert "attachError", "warning"
+		pickNotification: (type) ->
+			App.Notify.alert "attachSuccess", "success", {dynamicText: type}
+		displayFile: (type) ->
+			# if type is "image"
+			# 	filepicker.read
+			# else
+			# 	Box.viewAPI
 
 	class Leaf.ExportView extends Marionette.ItemView
 		id: "tree"

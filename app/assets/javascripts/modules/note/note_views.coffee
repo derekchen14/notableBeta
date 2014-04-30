@@ -497,10 +497,9 @@
 			leafRegion: "#leaf-region"
 		ui:
 			noteContent: ".note-content"
-			leaves: "span#leaves"
 		events: ->
-			"blur .note-content": "updateNote"
 			"keydown .note-content": @model.timeoutAndSave
+			"blur .note-content": "updateNote"
 			"click .leaf": "displayLeaf"
 			"click .icon-leaves-delete": "deleteBranch"
 
@@ -509,6 +508,7 @@
 			Note.eventManager.on "timeoutUpdate:#{@model.get('guid')}", @updateNote, @
 			Note.eventManager.on "setCursor:#{@model.get('guid')}", @setCursor, @
 			Note.eventManager.on "setTitle:#{@model.get('guid')}", @setNoteTitle, @
+			Note.eventManager.on "concealLeaf", @concealLeaf, @
 			@$el.on 'keydown', null, 'return', @createBranch.bind @
 			@$el.on 'keydown', null, 'up', @setCursor.bind @
 			@$el.on 'keydown', null, 'down', @jumpFocusDown.bind @
@@ -520,6 +520,7 @@
 			Note.eventManager.off "timeoutUpdate:#{@model.get('guid')}", @updateNote, @
 			Note.eventManager.off "setCursor:#{@model.get('guid')}", @setCursor, @
 			Note.eventManager.off "setTitle:#{@model.get('guid')}", @setNoteTitle, @
+			Note.eventManager.off "concealLeaf", @concealLeaf, @
 
 		createBranch: (e) ->
 			e.preventDefault()
@@ -560,8 +561,12 @@
 
 		displayLeaf: (e) ->
 			$(e.currentTarget).toggleClass('selected')
-			$("span#leaves").toggleClass("grow")
 			@ui.noteContent.toggleClass("shrink")
+			$("span#leaves").toggleClass("grow")
+		concealLeaf: ->
+			$(".leaf").removeClass("selected")
+			@ui.noteContent.removeClass("shrink")
+			$("span#leaves").removeClass("grow")
 		deleteBranch: (e) ->
 			@zoomOut(e)
 			App.Note.tree.deleteNote @model

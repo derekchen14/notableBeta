@@ -6,6 +6,7 @@
 	#   selfDestruct: [boolean]
 	#   destructTime: [time in ms]  // time until it is destroyed
 	#   retryTime: [integer] // time until sync will be perfomed again
+	#   dynamicText: [string] // variable string for custom descriptions
 	# For example:
 	#   App.Notify.alert 'connectionLost', 'danger', {selfDestruct: false}
 
@@ -85,13 +86,16 @@
 			destructTime: Notify._notificationTimeOut
 		if options.retryTime?
 			attributes.notificationMessage = _customMessage(options.retryTime, message)
+		if options.dynamicText?
+			attributes.notificationMessage = _customMessage(options.dynamicText, message)
 		_.defaults options, attributes
 
-	_customMessage = (retryTime, message) ->
+	_customMessage = (variable, message) ->
 		switch message
-			when "connectionRetry" then "Trying to reconnect in #{retryTime} seconds."
-			when "evernoteRateLimit" then "Evernote usage has been temporarily exceeded. Please try again in #{Math.floor(retryTime/60)+1} minutes. <a href='learn#limits'>Learn More</a>"
-			else "Try again in #{retryTime} minutes."
+			when "connectionRetry" then "Trying to reconnect in #{variable} seconds."
+			when "evernoteRateLimit" then "Evernote usage has been temporarily exceeded. Please try again in #{Math.floor(variable/60)+1} minutes. <a href='learn#limits'>Learn More</a>"
+			when "attachSuccess" then "Great job! You successfully attached the #{variable} to your note."
+			else "Something went wrong, please try again later."
 
 	# Save notification region
 	_timeoutID = null
