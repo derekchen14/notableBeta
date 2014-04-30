@@ -50,8 +50,8 @@
 					attach_size: InkBlob.size
 					note_id: App.Note.activeBranch.attributes.id
 				@postPickProcessing(InkBlob)
-			), (FPError) ->
-				console.log FPError.toString()
+			), (pickError) ->
+				console.log pickError.toString()
 				App.Notify.alert 'attachError', 'warning'
 		exportParagraph: ->
 			App.Note.eventManager.trigger "render:export", @model, true
@@ -86,9 +86,8 @@
 			$('.crown-attach').hide()
 			App.Note.eventManager.trigger "concealLeaf"
 			type = @fileType(InkBlob.mimetype)
-			console.log type
 			@pickNotification(type)
-			@displayFile(type)
+			if type is "image" then @displayImage(InkBlob) else @displayFile(InkBlob)
 		fileType: (mimetype) ->
 			front = mimetype.slice(0,3)
 			back = mimetype.slice(-3)
@@ -104,11 +103,23 @@
 				App.Notify.alert "attachError", "warning"
 		pickNotification: (type) ->
 			App.Notify.alert "attachSuccess", "success", {dynamicText: type}
-		displayFile: (type) ->
-			# if type is "image"
-			# 	filepicker.read
-			# else
-			# 	Box.viewAPI
+		displayImage: (InkBlob) ->
+			mimetype = InkBlob.mimetype
+			filepicker.read InkBlob,
+				base64encode: true
+				# cache: true
+			, ((imageData) ->
+				block = "data:"+mimetype+";base64,"+imageData
+				$(".branch-image")[0].src = block
+				$(".branch-image").addClass("present")
+			), (pickError) ->
+				console.log pickError.toString()
+				App.Notify.alert "attachError", "warning"
+		displayFile: (InkBlob) ->
+			fileURL = "<a href="+InkBlob.url+">Click here</a>"
+			fileNAME = InkBlob.filename.slice(0,100)
+			$(".branch-file").html(fileURL+" to view "+fileNAME)
+			$(".branch-file").addClass("present")
 
 	class Leaf.ExportView extends Marionette.ItemView
 		id: "tree"
