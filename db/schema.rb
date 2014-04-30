@@ -14,14 +14,17 @@
 ActiveRecord::Schema.define(:version => 20140429144902) do
 
   create_table "leaves", :force => true do |t|
-    t.string   "attachment"
+    t.string   "attach_url"
+    t.string   "filename"
+    t.string   "mimetype"
+    t.integer  "attach_size"
     t.string   "color"
     t.string   "emoticon"
     t.string   "eng"
-    t.string   "usn"
+    t.integer  "usn"
     t.integer  "note_id"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
   end
 
   add_index "leaves", ["note_id"], :name => "index_leaves_on_note_id"

@@ -69,6 +69,7 @@
 
 		#Leaves
 		attachError: "There was an error attaching the file to your note."
+		attachSuccess: "Great job! You successfully attached the file to your note."
 
 	@alert = (message, type, options) ->
 		throw "invalid notification message" unless _notificationMessages[message]?

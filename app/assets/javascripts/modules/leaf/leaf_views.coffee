@@ -17,13 +17,14 @@
 			"click .attach-btn": "attachFile"
 			"click .icon-leaves-export": "exportParagraph"
 			"click .emoticon-btn": "selectEmoticon"
+
 		initialize: ->
 			@cursorApi = App.Helper.CursorPositionAPI
 		onClose: ->
 			@$el.off()
 
 		displayAttach: ->
-			$(".crown-attach").toggleClass('hidden')  # move to crown views
+			$(".crown-attach").toggle()  # move to crown views
 			@createDropTarget()  # move to initialize
 
 		addTag: ->
@@ -44,10 +45,17 @@
 			, ((InkBlob) =>
 				@model.save
 					attachment: InkBlob.url
+					# attach_url: InkBlob.url
+					# filename: InkBlob.filename
+					# mimetype: InkBlob.mimetype
+					# attach_size: InkBlob.size
 					note_id: App.Note.activeBranch.attributes.id
-				console.log "succcess!"
+				@ui.attach.removeClass("over")
+				$('.crown-attach').hide()
+				App.Notify.alert 'attachSuccess', 'success'
 			), (FPError) ->
 				console.log FPError.toString()
+				App.Notify.alert 'attachError', 'warning'
 		exportParagraph: ->
 			App.Note.eventManager.trigger "render:export", @model, true
 		selectEmoticon:->
@@ -58,6 +66,7 @@
 				extensions: [
 					".pdf", ".ppt", ".pptx", ".doc", ".docx", ".png", ".gif", ".jpeg"
 				]
+				maxSize: 5242880 # 5MB
 				dragEnter: =>
 					@ui.attach.addClass("over") # make something turn yellow
 				dragLeave: =>
@@ -66,13 +75,17 @@
 					@ui.attach.text "Uploading ("+percentage+"%)"
 				onSuccess: (InkBlob) =>
 					@model.save
-						attachment: InkBlob.url
+						attachment: InkBlob[0].url
+						# attach_url: InkBlob.url
+						# filename: InkBlob.filename
+						# mimetype: InkBlob.mimetype
+						# attach_size: InkBlob.size
 						note_id: App.Note.activeBranch.attributes.id
-					console.log "succcess!"
+					@ui.attach.removeClass("over")
+					$('.crown-attach').hide()
+					App.Notify.alert 'attachSuccess', 'success'
 				onError: (type, message) ->
 					console.log type+" : "+message
-				services: "COMPUTER"
-				maxSize: 5242880 # 5MB
 
 	class Leaf.ExportView extends Marionette.ItemView
 		id: "tree"

@@ -1,11 +1,14 @@
 class CreateLeaves < ActiveRecord::Migration
   def change
     create_table :leaves do |t|
-      t.string :attachment
+      t.string :attach_url
+      t.string :filename
+      t.string :mimetype
+      t.integer :attach_size
       t.string :color
       t.string :emoticon
       t.string :eng
-      t.string :usn
+      t.integer :usn
       t.references :note
 
       t.timestamps
