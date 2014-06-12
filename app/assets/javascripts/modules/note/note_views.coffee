@@ -502,6 +502,8 @@
 			"blur .note-content": "updateNote"
 			"click .leaf": "displayLeaf"
 			"click .icon-leaves-delete": "deleteBranch"
+			"click .glyphicon-chevron-down": "expandView"
+			"click .glyphicon-chevron-up": "collapseView"
 
 		initialize: ->
 			@cursorApi = App.Helper.CursorPositionAPI
@@ -584,4 +586,11 @@
 		clearZoom: ->
 			Note.eventManager.trigger "clearZoom"
 
+		expandView: ->
+			console.log "got this far"
+			$(".branch-file").addClass("expanded")
+			$("span.glyphicon").delay(200).removeClass("glyphicon-chevron-down").addClass("glyphicon-chevron-up")
+		collapseView: ->
+			$(".branch-file").removeClass("expanded")
+			$("span.glyphicon").delay(200).removeClass("glyphicon-chevron-up").addClass("glyphicon-chevron-down")
 )
