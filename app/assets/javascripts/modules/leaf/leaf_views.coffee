@@ -107,9 +107,8 @@
 			mimetype = InkBlob.mimetype
 			filepicker.read InkBlob,
 				base64encode: true
-				# cache: true
+				cache: true
 			, ((imageData) ->
-				console.log imageData
 				$("#display-region").removeClass("hidden")
 				block = "data:"+mimetype+";base64,"+imageData
 				$(".branch-image")[0].src = block
@@ -117,45 +116,12 @@
 				console.log pickError.toString()
 				App.Notify.alert "attachError", "warning"
 		displayFile: (InkBlob) ->
-			documentID = @getDocumentID(InkBlob.url)
-			console.log "documentID: ",documentID
-			sessionID = @getSessionID(documentID)
-			url="https://view-api.box.com/1/sessions/"+sessionID+"/view?theme=dark"
-			$(".branch-file")[0].src = url
-			$("#display-region").removeClass("hidden")
-		insertHack: ->
-			console.log "insertHack fired"
-			docURL = "https://www.filepicker.io/api/file/bZQz7SR7TXyJc34x5ErB"
-			@getDocumentID(docURL)
-		getDocumentID: (docURL) ->
-			url = "https://view-api.box.com/1/documents"
-			# $.get(url, {authorization : {token: "tjt18xp0gh56wr0xixhbjhooahcc0e4k"}}, dataType: "jsonp")
-			$.ajax
-				type: "POST"
-				url: "https://view-api.box.com/1/documents"
-				Authorization: {Token: "tjt18xp0gh56wr0xixhbjhooahcc0e4k"}
-				data:
-					url: docURL
-				success: (data, status, jqXHR) ->
-					console.log data
-					console.log status
-					console.log jqXHR
-				dataType: "jsonp"
-
-			# curl https://view-api.box.com/1/documents \
-				# -H "Authorization: Token tjt18xp0gh56wr0xixhbjhooahcc0e4k" \
-				# -H "Content-Type: application/json" \
-				# -d '{"url": "'+url+'"}' \
-				# -X POST
-             									
-		# getSessionID: (documentID) ->
-		# 	window.setTimeOut =>
-		# 		curl https://view-api.box.com/1/sessions \
-		# 		-H "Authorization: Token tjt18xp0gh56wr0xixhbjhooahcc0e4k" \
-		# 		-H "Content-Type: application/json" \
-		# 		-d '{"document_id": "'+documentID+'", "duration": 60}' \
-		# 		-X POST \
-		# 		-i
+			$.getJSON "/attach",
+				doc: InkBlob.url
+			, (data) ->
+				url="https://view-api.box.com/1/sessions/"+data.sessionID+"/view?theme=dark"
+				$(".branch-file")[0].src = url
+				$("#display-region").removeClass("hidden")
 
 	class Leaf.ExportView extends Marionette.ItemView
 		id: "tree"

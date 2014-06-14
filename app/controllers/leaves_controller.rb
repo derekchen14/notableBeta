@@ -1,4 +1,6 @@
 class LeavesController < ApplicationController
+  require 'net/http'
+  require 'uri'
   respond_to :html, :json
 
   # GET /leaves.json
@@ -52,6 +54,67 @@ class LeavesController < ApplicationController
       format.html { redirect_to leaves_url }
       format.json { head :no_content }
     end
+  end
+
+  def attach
+    document_res = document_request(params)
+    document_body = JSON.parse(document_res.body)
+    document_id = document_body["id"]
+
+    session_res = session_request(document_id)
+    session_body = JSON.parse(session_res.body)
+    sessionID = session_body["id"]
+
+    respond_to do |format|
+      format.json { render json: {sessionID: sessionID } }
+    end
+  end
+
+  def document_request(params)
+    uri = URI.parse('https://view-api.box.com/1/documents')
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    req = Net::HTTP::Post.new(uri.request_uri)
+    req["Authorization"] = "Token tjt18xp0gh56wr0xixhbjhooahcc0e4k"
+    req["content-type"] = "application/json"
+    req.body = '{"url": "'+params[:doc]+'" }'
+
+    return http.request(req)
+  end
+
+  def session_request(document_id)
+    uri = URI.parse('https://view-api.box.com/1/sessions')
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    req = Net::HTTP::Post.new(uri.request_uri)
+    req["Authorization"] = "Token tjt18xp0gh56wr0xixhbjhooahcc0e4k"
+    req["content-type"] = "application/json"
+    req.body = '{"document_id": "'+document_id+'" }'
+
+    res = http.request(req)
+    if res.code == "201"
+      return res
+    elsif res.code == "202"
+      header =  res.header.to_hash
+      retry_time = header["retry-after"][0].to_i
+      sleep(retry_time)
+      session_request(document_id)
+    end
+  end
+
+  def ask_question(question)
+      print question
+      answer = STDIN.gets.chomp
+      answer = ask_question question if answer.empty?
+      return answer;
+  end
+
+  def check_status(res)
+
   end
 
 end

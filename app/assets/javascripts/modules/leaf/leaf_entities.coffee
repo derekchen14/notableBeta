@@ -7,9 +7,13 @@
 			color: "black"
 			emoticon: "none"
 
-	# class Leaf.LeafCollection extends Backbone.Collection
-	# 	url: '/leaves'
-	# 	model: Leaf.LeafModel
+	class Leaf.LeafCollection extends Backbone.Collection
+		url: '/leaves'
+		model: Leaf.LeafModel
+
+		getLeaf: (note_id) ->
+			console.log "Some great number", note_id
+		# something to find a specific notes leaves
 
 	class Leaf.ExportModel extends Backbone.Model
 		urlRoot : '/leaves'

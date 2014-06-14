@@ -15,6 +15,7 @@ Notable::Application.routes.draw do
   get "finish" => "evernote#finish"
   get "search" => "notes#search"
   get "reset" => "notes#reset"
+  get "attach" => "leaves#attach"
 
   get "sync" => "evernote#begin_sync_data"
   post "sync" => "evernote#receive_sync_data"
