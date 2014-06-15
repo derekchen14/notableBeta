@@ -31,6 +31,7 @@
 			$(".crown-attach").toggle()
 			@createDropTarget()  # move to initialize
 		displayEmoticon: ->
+			# App.Note.eventManager.trigger "concealLeaf"
 			$(".crown-emoticon").toggle()
 
 		addTag: ->
@@ -49,11 +50,6 @@
 				services: "COMPUTER"
 				maxSize: 5242880 # 5MB
 			, ((InkBlob) =>
-				App.Notify.alert "loading", "warning"
-				@model.save
-					filename: InkBlob.filename
-					attach_size: InkBlob.size
-					note_id: App.Note.activeBranch.attributes.id
 				@postPickProcessing(InkBlob)
 			), (pickError) ->
 				console.log pickError.toString()
@@ -76,16 +72,12 @@
 				onProgress: (percentage) =>
 					@ui.attach.text "Uploading ("+percentage+"%)"
 				onSuccess: (InkBlob) =>
-					App.Notify.alert "loading", "warning"
-					@model.save
-						filename: InkBlob[0].filename
-						attach_size: InkBlob[0].size
-						note_id: App.Note.activeBranch.attributes.id
 					@postPickProcessing(InkBlob[0])
 				onError: (type, message) ->
 					console.log type+" : "+message
 					App.Notify.alert 'attachError', 'danger'
 		postPickProcessing: (InkBlob) ->
+			App.Notify.alert "loading", "warning"
 			@ui.attach.removeClass("over")
 			$('.crown-attach').hide()
 			App.Note.eventManager.trigger "concealLeaf"
@@ -103,13 +95,14 @@
 				@displayFile(InkBlob, "PowerPoint")
 			else
 				App.Notify.alert "attachError", "warning"
+
 		displayImage: (InkBlob, type) ->
 			filepicker.read InkBlob,
 				base64encode: true
 				cache: true
 			, ((imageData) =>
 				image_source = "data:"+type+";base64,"+imageData
-				@displayAttachment(image_source, "image")
+				@displayAttachment(image_source, "image", InkBlob)
 			), (pickError) ->
 				console.log pickError.toString()
 				App.Notify.alert "attachError", "danger"
@@ -118,19 +111,27 @@
 				doc: InkBlob.url
 			, ((fileData) =>
 				file_source = "https://view-api.box.com/1/sessions/"+fileData.sessionID+"/view?theme=dark"
-				@displayAttachment(file_source, type)
+				@displayAttachment(file_source, type, InkBlob)
 			), (pickError) ->
 				console.log pickError.toString()
 				App.Notify.alert "attachError", "danger"
-		displayAttachment: (source, type) ->
-			console.log type
-			$attachment = if type is "image" then $('<img></img>') else $('<iframe></iframe>')
-			# $attachment.attr("allowfullscren","true")
-			$attachment.attr("src", source).appendTo("#display-region")
-			$("#display-region").removeClass("hidden")
+		displayAttachment: (source, type, blob=false) ->
+			if type is "image"
+				$attachment = $('<img class="attach-image"></img>')
+			else
+				$attachment = $('<iframe class="attach-file"></iframe>')
+				$attachment.attr("allowfullscreen","true")
+				$chevron = $('<span></span>').appendTo("#display-region")
+				$chevron.addClass("glyphicon glyphicon-chevron-down fire")
+			$attachment.attr("src", source).prependTo("#display-region")
+			if blob then @saveAttachment(source, type, blob)
+		saveAttachment: (source, type, blob) ->
 			@model.save
 				attach_src: source
 				mimetype: type
+				filename: blob.filename
+				attach_size: blob.size
+				note_id: App.Note.activeBranch.attributes.id
 			, success: ->
 				App.Notify.alert "attachSuccess", "success", {dynamicText: type}
 			, error: ->

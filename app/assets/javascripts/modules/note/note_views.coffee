@@ -587,10 +587,9 @@
 			Note.eventManager.trigger "clearZoom"
 
 		expandView: ->
-			console.log "got this far"
-			$(".branch-file").addClass("expanded")
+			$(".attach-file").addClass("expanded")
 			$("span.glyphicon").delay(200).removeClass("glyphicon-chevron-down").addClass("glyphicon-chevron-up")
 		collapseView: ->
-			$(".branch-file").removeClass("expanded")
+			$(".attach-file").removeClass("expanded")
 			$("span.glyphicon").delay(200).removeClass("glyphicon-chevron-up").addClass("glyphicon-chevron-down")
 )
