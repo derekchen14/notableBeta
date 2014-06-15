@@ -4,6 +4,7 @@
 
 	Leaf.Controller = Marionette.Controller.extend
 		initialize: ->
+			@leafCollection = new App.Leaf.LeafCollection()
 			@eventManager = Leaf.eventManager
 			@setGlobals()
 			@setEvents()
@@ -11,8 +12,16 @@
 			App.Notebook.initializedTrunk.then =>
 				notebook_id = App.Notebook.activeTrunk.id
 				@startBloodhound(notebook_id)
+				@leafCollection.fetch
+					success: =>
+						Leaf.allLeaves = @leafCollection
+						Leaf.activeLeaves = @leafCollection.getLeaf(App.Note.activeBranch.id)
+						Leaf.initializedLeaves.resolve()
 		setGlobals: ->
 			filepicker.setKey("AsJRTD9qQfyTSHqSr3VGAz")
+			Leaf.initializedLeaves = $.Deferred()
+			Leaf.activeLeaves = "none"
+			Leaf.allLeaves = @leafCollection
 		setEvents: ->
 			@eventManager.on "typeahead:attach", @attachTypeahead, @
 

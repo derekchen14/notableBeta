@@ -5,11 +5,11 @@ class LeavesController < ApplicationController
 
   # GET /leaves.json
   def index
-    # unless current_user.active_leaf?
-    #   view_context.make_default_leaf
-    # end
+    # @leaves = Leaf.where("user_id = " + params[:user_id])
+    # can't do this because leaves has no user_id
     @leaves = Leaf.all
     respond_with(@leaves)
+
   end
 
   # GET /leaves/1.json
@@ -104,17 +104,6 @@ class LeavesController < ApplicationController
       sleep(retry_time)
       session_request(document_id)
     end
-  end
-
-  def ask_question(question)
-      print question
-      answer = STDIN.gets.chomp
-      answer = ask_question question if answer.empty?
-      return answer;
-  end
-
-  def check_status(res)
-
   end
 
 end

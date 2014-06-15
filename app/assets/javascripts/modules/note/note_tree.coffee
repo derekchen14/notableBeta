@@ -137,7 +137,7 @@
 			searchResults
 
 		# Search the whole tree recursively but top level
-		# Returns the element maching id and throws error if this fails
+		# Returns the element matching id and throws error if this fails
 		findNote: (guid) ->
 			searchedNote = false
 			return Note.activeBranch if Note.activeBranch isnt 'root' and guid is Note.activeBranch.get('guid')

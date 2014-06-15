@@ -15,7 +15,6 @@
 		initialize: (options) ->
 			@allNotesByDepth = new App.Note.Collection()
 			@tree = new App.Note.Tree()
-			@leafModel = new App.Leaf.LeafModel()
 			@setGlobals()
 			@setEvents()
 		start: ->
@@ -38,7 +37,6 @@
 			Note.tree = @tree
 			Note.activeTree = @tree
 			Note.activeBranch = "root"
-			Note.leaf = @leafModel
 		setEvents: ->
 			Note.eventManager.on "clearZoom", @clearZoom, @
 			Note.eventManager.on "render:export", @showExportView, @
@@ -101,7 +99,14 @@
 		showCrownView: ->
 			@crownView = new App.Note.CrownView(model: App.Note.activeBranch)
 			App.contentRegion.currentView.crownRegion.show @crownView
-			@leafView = new App.Leaf.LeafView(model: App.Note.leaf)
+			if App.Leaf.activeLeaves
+				@showLeavesView()
+			else
+				App.Leaf.initializedLeaves.then =>
+					@showLeavesView()
+
+		showLeavesView: ->
+			@leafView = new App.Leaf.LeafView(model: App.Leaf.activeLeaves)
 			App.contentRegion.currentView.crownRegion.currentView.leafRegion.show @leafView
 		clearCrownView: ->
 			if @crownView?
@@ -112,6 +117,7 @@
 				delete @leafView
 			App.Note.activeBranch = "root"
 			App.Note.activeTree = App.Note.tree
+			App.Leaf.activeLeaves = "none"
 
 		# Breadcrumbs
 		showBreadcrumbView: ->
@@ -145,7 +151,7 @@
 			App.Note.initializedTree.then =>
 				return false if App.Note.activeBranch is 'root'
 				 # triggered first to keep previous active branch (reset in @clearCrownView)
-				App.Note.eventManager.trigger "notebook:clearZoom"
+				App.Note.eventManager.trigkger "notebook:clearZoom"
 				Backbone.history.navigate '#'
 				@clearCrownView()
 				@showContentView App.Note.tree
@@ -156,16 +162,23 @@
 		zoomIn: (guid) ->
 			App.Note.initializedTree.then =>
 				App.Note.activeTree = App.Note.tree.getCollection guid
-				App.Note.activeBranch = App.Note.tree.findNote(guid)
-				@showCrownView()
-				@showContentView App.Note.activeTree
-				@showBreadcrumbView()
+				App.Note.activeBranch = App.Note.tree.getNote(guid)
+				App.Leaf.activeLeaves = App.Leaf.allLeaves.getLeaf(App.Note.activeBranch.id)
+
+				@showViewsOnZoom()
 				App.Helper.eventManager.trigger "zoomChrome"
-				if Note.activeTree.first()?
+				@setCursorOnZoom()
+				App.Note.eventManager.trigger "notebook:zoomIn", App.Note.activeBranch.get('guid')
+		showViewsOnZoom: ->
+			@showCrownView()
+			@showContentView App.Note.activeTree
+			@showBreadcrumbView()
+		setCursorOnZoom: ->
+			if Note.activeTree.first()?
 					Note.eventManager.trigger "setCursor:#{Note.activeTree.first().get('guid')}"
 				else
 					Note.eventManager.trigger "setCursor:#{Note.activeBranch.get('guid')}"
-				App.Note.eventManager.trigger "notebook:zoomIn", App.Note.activeBranch.get('guid')
+
 
 		changeActiveTrunk: ->
 			@showContentView(new Backbone.Collection)

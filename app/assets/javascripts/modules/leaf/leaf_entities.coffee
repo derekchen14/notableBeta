@@ -3,7 +3,7 @@
 	class Leaf.LeafModel extends Backbone.Model
 		urlRoot: '/leaves'
 		defaults:
-			attachment: ""
+			attach_url: ""
 			color: "black"
 			emoticon: "none"
 
@@ -12,8 +12,8 @@
 		model: Leaf.LeafModel
 
 		getLeaf: (note_id) ->
-			console.log "Some great number", note_id
-		# something to find a specific notes leaves
+			for leaf in @models
+				return leaf if leaf.attributes.note_id is note_id
 
 	class Leaf.ExportModel extends Backbone.Model
 		urlRoot : '/leaves'
