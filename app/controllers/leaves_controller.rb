@@ -92,7 +92,7 @@ class LeavesController < ApplicationController
     req = Net::HTTP::Post.new(uri.request_uri)
     req["Authorization"] = "Token tjt18xp0gh56wr0xixhbjhooahcc0e4k"
     req["content-type"] = "application/json"
-    req.body = '{"document_id": "'+document_id+'" }'
+    req.body = '{"document_id": "'+document_id+'", "expires_at": "2020-01-01T00:00:01Z"}'
 
     res = http.request(req)
     if res.code == "201"
