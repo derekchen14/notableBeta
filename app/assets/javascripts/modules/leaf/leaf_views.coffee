@@ -9,8 +9,9 @@
 			attach: ".attach-drop"
 
 		events: ->
+			"click .icon-leaves-tag": "displayTag"
 			"click .icon-leaves-attach": "displayAttach"
-			"click .icon-leaves-tag": "insertHack"
+			"click .icon-leaves-emoticon": "displayEmoticon"
 
 			"click .add-tag-btn": "addTag"
 			"click .icon-leaves-share": "shareNote"
@@ -20,12 +21,17 @@
 
 		initialize: ->
 			@cursorApi = App.Helper.CursorPositionAPI
+		onRender: ->
+			if source = @model.attributes.attach_src
+				@displayAttachment(source, @model.attributes.mimetype)
 		onClose: ->
 			@$el.off()
 
 		displayAttach: ->
-			$(".crown-attach").toggle()  # move to crown views
+			$(".crown-attach").toggle()
 			@createDropTarget()  # move to initialize
+		displayEmoticon: ->
+			$(".crown-emoticon").toggle()
 
 		addTag: ->
 			console.log "Tag should be added"
@@ -43,10 +49,9 @@
 				services: "COMPUTER"
 				maxSize: 5242880 # 5MB
 			, ((InkBlob) =>
+				App.Notify.alert "loading", "warning"
 				@model.save
-					attach_url: InkBlob.url
 					filename: InkBlob.filename
-					mimetype: InkBlob.mimetype
 					attach_size: InkBlob.size
 					note_id: App.Note.activeBranch.attributes.id
 				@postPickProcessing(InkBlob)
@@ -71,57 +76,65 @@
 				onProgress: (percentage) =>
 					@ui.attach.text "Uploading ("+percentage+"%)"
 				onSuccess: (InkBlob) =>
+					App.Notify.alert "loading", "warning"
 					@model.save
-						attach_url: InkBlob[0].url
 						filename: InkBlob[0].filename
-						mimetype: InkBlob[0].mimetype
 						attach_size: InkBlob[0].size
 						note_id: App.Note.activeBranch.attributes.id
 					@postPickProcessing(InkBlob[0])
 				onError: (type, message) ->
 					console.log type+" : "+message
-					App.Notify.alert 'attachError', 'warning'
+					App.Notify.alert 'attachError', 'danger'
 		postPickProcessing: (InkBlob) ->
 			@ui.attach.removeClass("over")
 			$('.crown-attach').hide()
 			App.Note.eventManager.trigger "concealLeaf"
-			type = @fileType(InkBlob.mimetype)
-			@pickNotification(type)
-			if type is "image" then @displayImage(InkBlob) else @displayFile(InkBlob)
-		fileType: (mimetype) ->
+			@determineFileType(InkBlob, InkBlob.mimetype)
+		determineFileType: (InkBlob, mimetype) ->
 			front = mimetype.slice(0,3)
 			back = mimetype.slice(-3)
 			if front is "ima"
-				return "image"
+				@displayImage(InkBlob, mimetype)
 			else if back is "pdf"
-				return "PDF"
+				@displayFile(InkBlob, "PDF")
 			else if back is "ord" or back is "ent"
-				return "Word Doc"
+				@displayFile(InkBlob, "Word Doc")
 			else if back is "int" or back is "ion"
-				return "PowerPoint"
+				@displayFile(InkBlob, "PowerPoint")
 			else
 				App.Notify.alert "attachError", "warning"
-		pickNotification: (type) ->
-			App.Notify.alert "attachSuccess", "success", {dynamicText: type}
-		displayImage: (InkBlob) ->
-			mimetype = InkBlob.mimetype
+		displayImage: (InkBlob, type) ->
 			filepicker.read InkBlob,
 				base64encode: true
 				cache: true
-			, ((imageData) ->
-				$("#display-region").removeClass("hidden")
-				block = "data:"+mimetype+";base64,"+imageData
-				$(".branch-image")[0].src = block
+			, ((imageData) =>
+				image_source = "data:"+type+";base64,"+imageData
+				@displayAttachment(image_source, "image")
 			), (pickError) ->
 				console.log pickError.toString()
-				App.Notify.alert "attachError", "warning"
-		displayFile: (InkBlob) ->
+				App.Notify.alert "attachError", "danger"
+		displayFile: (InkBlob, type) ->
 			$.getJSON "/attach",
 				doc: InkBlob.url
-			, (data) ->
-				url="https://view-api.box.com/1/sessions/"+data.sessionID+"/view?theme=dark"
-				$(".branch-file")[0].src = url
-				$("#display-region").removeClass("hidden")
+			, ((fileData) =>
+				file_source = "https://view-api.box.com/1/sessions/"+fileData.sessionID+"/view?theme=dark"
+				@displayAttachment(file_source, type)
+			), (pickError) ->
+				console.log pickError.toString()
+				App.Notify.alert "attachError", "danger"
+		displayAttachment: (source, type) ->
+			console.log type
+			$attachment = if type is "image" then $('<img></img>') else $('<iframe></iframe>')
+			# $attachment.attr("allowfullscren","true")
+			$attachment.attr("src", source).appendTo("#display-region")
+			$("#display-region").removeClass("hidden")
+			@model.save
+				attach_src: source
+				mimetype: type
+			, success: ->
+				App.Notify.alert "attachSuccess", "success", {dynamicText: type}
+			, error: ->
+				App.Notify.alert "attachError", "danger"
 
 	class Leaf.ExportView extends Marionette.ItemView
 		id: "tree"

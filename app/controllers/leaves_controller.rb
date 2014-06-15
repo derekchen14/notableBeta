@@ -9,7 +9,6 @@ class LeavesController < ApplicationController
     # can't do this because leaves has no user_id
     @leaves = Leaf.all
     respond_with(@leaves)
-
   end
 
   # GET /leaves/1.json

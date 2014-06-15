@@ -1,7 +1,7 @@
 class CreateLeaves < ActiveRecord::Migration
   def change
     create_table :leaves do |t|
-      t.string :attach_url
+      t.text :attach_src
       t.string :filename
       t.string :mimetype
       t.integer :attach_size

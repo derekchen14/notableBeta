@@ -14,7 +14,7 @@
 ActiveRecord::Schema.define(:version => 20140429144902) do
 
   create_table "leaves", :force => true do |t|
-    t.string   "attach_url"
+    t.text     "attach_src"
     t.string   "filename"
     t.string   "mimetype"
     t.integer  "attach_size"

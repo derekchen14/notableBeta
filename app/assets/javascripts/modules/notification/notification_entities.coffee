@@ -35,6 +35,7 @@
 		saved: "Changes saved."
 		syncing: "<i>connecting to Notable ... </i>"
 		synced: "Connected."
+		loading: "<i>loading ...</i>"
 		deleteNote: "Note deleted. <a class='undo-note-delete'> undo </a>"
 		undo: "Change undone."
 		newNote: "New note has been added."
