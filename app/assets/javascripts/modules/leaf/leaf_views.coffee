@@ -103,7 +103,7 @@
 				cache: true
 			, ((imageData) =>
 				image_source = "data:"+type+";base64,"+imageData
-				@manageAttachment(image_source, "image", InkBlob)
+				@saveAttachment(image_source, "image", InkBlob)
 			), (pickError) ->
 				console.log pickError.toString()
 				App.Notify.alert "attachError", "danger"
@@ -112,43 +112,26 @@
 				doc: InkBlob.url
 			, ((fileData) =>
 				file_source = "https://view-api.box.com/1/sessions/"+fileData.sessionID+"/view?theme=dark"
-				@manageAttachment(file_source, type, InkBlob)
+				@saveAttachment(file_source, type, InkBlob)
 			), (pickError) ->
 				console.log pickError.toString()
 				App.Notify.alert "attachError", "danger"
 
-		manageAttachment: (s,t,b) ->
-			attachAlreadyExists = @model.attributes.attach_size > 1
-			console.log @model.isNew()
-			if attachAlreadyExists then @updateAttach(s,t,b) else @saveAttach(s,t,b)
-		updateAttach: (source, type, blob) ->
-			console.log "came to update", @model
+		saveAttachment: (source, type, blob) ->
 			@model.save
 				attach_src: source
 				mimetype: type
 				filename: blob.filename
 				attach_size: blob.size
-				patch: true
-			, success: ->
-				$attach = if type is "image" then $(".attach-image") else $("attach-file")
-				$attach.attr("src", source)
-				App.Notify.alert "attachUpdate", "success", {dynamicText: type}
-			, error: ->
-				App.Notify.alert "attachError", "danger"
-		saveAttach: (source, type, blob) ->
-			console.log "came to save", @model
-			@model.collection.create
-				attach_src: source
-				mimetype: type
-				filename: blob.filename
-				attach_size: blob.size
 				note_id: App.Note.activeBranch.attributes.id
+				patch: true
 			, success: =>
 				@showAttachment(source, type)
 				App.Notify.alert "attachSuccess", "success", {dynamicText: type}
 			, error: ->
 				App.Notify.alert "attachError", "danger"
 		showAttachment: (source, type) ->
+			$("#display-region").empty()
 			if type is "image"
 				$attachment = $('<img class="attach-image"></img>')
 			else
