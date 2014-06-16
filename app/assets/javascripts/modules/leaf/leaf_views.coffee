@@ -15,7 +15,7 @@
 
 			"click .add-tag-btn": "addTag"
 			"click .icon-leaves-share": "shareNote"
-			"click .attach-btn": "attachFile"
+			"click .attach-btn": "tryAttachingFile"
 			"click .icon-leaves-export": "exportParagraph"
 			"click .emoticon-btn": "selectEmoticon"
 
@@ -43,6 +43,16 @@
 		# 		mimetype:"image/png"
 		# 	, (InkBlob) ->
 		# 			console.log(InkBlob.url)
+		tryAttachingFile: ->
+			online = App.Helper.ConnectionAPI.checkConnection
+			$.when(online()).then ( =>
+				@attachFile()
+			), ( =>
+				App.Notify.alert 'preventAttach', 'warning', {destructTime: 9000}
+				$('.crown-attach').hide()
+				App.Note.eventManager.trigger "concealLeaf"
+				App.Helper.CursorPositionAPI.resetToTreeTop()
+			)
 		attachFile: ->
 			filepicker.pick
 				extensions: [

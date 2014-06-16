@@ -69,10 +69,11 @@
 		exportParagraph: "Your notes are ready for export in paragraph form."
 		brokenTree: "Sorry, something just broke. Your notebook will attempt to reset in a few seconds."
 
-		#Leaves
+		# Attachments
 		attachError: "There was an error attaching the file to your note."
 		attachSuccess: "Great job! You successfully attached the file to your note."
 		attachUpdate: "You successfully updated the file on this note."
+		preventAttach: "Sorry, attaching files while offline is currently not supported."
 
 	@alert = (message, type, options) ->
 		throw "invalid notification message" unless _notificationMessages[message]?
