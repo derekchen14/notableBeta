@@ -12,8 +12,12 @@
 
 		getLeaf: (note_id) ->
 			for leaf in @models
+				console.log leaf
 				return leaf if leaf.attributes.note_id is note_id
-			new App.Leaf.LeafModel() # only runs if no match is found
+			bar = new App.Leaf.LeafModel() # only runs if no match is found
+			@add(bar)
+			console.log bar
+			bar
 
 	class Leaf.ExportModel extends Backbone.Model
 		urlRoot : '/leaves'

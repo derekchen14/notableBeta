@@ -72,6 +72,7 @@
 		#Leaves
 		attachError: "There was an error attaching the file to your note."
 		attachSuccess: "Great job! You successfully attached the file to your note."
+		attachUpdate: "You successfully updated the file on this note."
 
 	@alert = (message, type, options) ->
 		throw "invalid notification message" unless _notificationMessages[message]?
@@ -96,6 +97,7 @@
 			when "connectionRetry" then "Trying to reconnect in #{variable} seconds."
 			when "evernoteRateLimit" then "Evernote usage has been temporarily exceeded. Please try again in #{Math.floor(variable/60)+1} minutes. <a href='learn#limits'>Learn More</a>"
 			when "attachSuccess" then "Great job! You successfully attached the #{variable} to your note."
+			when "attachUpdate" then "You successfully updated the #{variable} on this note."
 			else "Something went wrong, please try again later."
 
 	# Save notification region

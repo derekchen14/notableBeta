@@ -23,12 +23,13 @@
 			@cursorApi = App.Helper.CursorPositionAPI
 		onRender: ->
 			if source = @model.attributes.attach_src
-				@displayAttachment(source, @model.attributes.mimetype)
+				@showAttachment(source, @model.attributes.mimetype)
 		onClose: ->
 			@$el.off()
 
 		displayAttach: ->
 			$(".crown-attach").toggle()
+			if @model.attributes.attach_size>1 then $(".attach-btn").text("Change File")
 			@createDropTarget()  # move to initialize
 		displayEmoticon: ->
 			# App.Note.eventManager.trigger "concealLeaf"
@@ -102,7 +103,7 @@
 				cache: true
 			, ((imageData) =>
 				image_source = "data:"+type+";base64,"+imageData
-				@displayAttachment(image_source, "image", InkBlob)
+				@manageAttachment(image_source, "image", InkBlob)
 			), (pickError) ->
 				console.log pickError.toString()
 				App.Notify.alert "attachError", "danger"
@@ -111,11 +112,43 @@
 				doc: InkBlob.url
 			, ((fileData) =>
 				file_source = "https://view-api.box.com/1/sessions/"+fileData.sessionID+"/view?theme=dark"
-				@displayAttachment(file_source, type, InkBlob)
+				@manageAttachment(file_source, type, InkBlob)
 			), (pickError) ->
 				console.log pickError.toString()
 				App.Notify.alert "attachError", "danger"
-		displayAttachment: (source, type, blob=false) ->
+
+		manageAttachment: (s,t,b) ->
+			attachAlreadyExists = @model.attributes.attach_size > 1
+			console.log @model.isNew()
+			if attachAlreadyExists then @updateAttach(s,t,b) else @saveAttach(s,t,b)
+		updateAttach: (source, type, blob) ->
+			console.log "came to update", @model
+			@model.save
+				attach_src: source
+				mimetype: type
+				filename: blob.filename
+				attach_size: blob.size
+				patch: true
+			, success: ->
+				$attach = if type is "image" then $(".attach-image") else $("attach-file")
+				$attach.attr("src", source)
+				App.Notify.alert "attachUpdate", "success", {dynamicText: type}
+			, error: ->
+				App.Notify.alert "attachError", "danger"
+		saveAttach: (source, type, blob) ->
+			console.log "came to save", @model
+			@model.collection.create
+				attach_src: source
+				mimetype: type
+				filename: blob.filename
+				attach_size: blob.size
+				note_id: App.Note.activeBranch.attributes.id
+			, success: =>
+				@showAttachment(source, type)
+				App.Notify.alert "attachSuccess", "success", {dynamicText: type}
+			, error: ->
+				App.Notify.alert "attachError", "danger"
+		showAttachment: (source, type) ->
 			if type is "image"
 				$attachment = $('<img class="attach-image"></img>')
 			else
@@ -124,18 +157,6 @@
 				$chevron = $('<span></span>').appendTo("#display-region")
 				$chevron.addClass("glyphicon glyphicon-chevron-down fire")
 			$attachment.attr("src", source).prependTo("#display-region")
-			if blob then @saveAttachment(source, type, blob)
-		saveAttachment: (source, type, blob) ->
-			@model.save
-				attach_src: source
-				mimetype: type
-				filename: blob.filename
-				attach_size: blob.size
-				note_id: App.Note.activeBranch.attributes.id
-			, success: ->
-				App.Notify.alert "attachSuccess", "success", {dynamicText: type}
-			, error: ->
-				App.Notify.alert "attachError", "danger"
 
 	class Leaf.ExportView extends Marionette.ItemView
 		id: "tree"

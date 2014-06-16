@@ -64,8 +64,15 @@ class NotesController < ApplicationController
 
   def reset
     note = Note.where(guid: params[:guid]).order("id DESC").limit(1).first
-    note.destroy
-    redirect_to root_path
+    note.destroy # something which might raise an exception
+  rescue SystemCallError => error
+    puts "--------- System Call Error ----------"
+    puts error.message # code that deals with some exception
+  rescue ArgumentError => error
+    puts "--------- Argument Error ----------"
+    puts error.message # code that deals with some other exception
+  ensure
+    redirect_to root_path # ensure that this code always runs, no matter what
   end
 
   private
