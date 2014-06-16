@@ -21,18 +21,26 @@
 
 		initialize: ->
 			@cursorApi = App.Helper.CursorPositionAPI
+			@noDropTarget = true
 		onRender: ->
 			if source = @model.attributes.attach_src
 				@showAttachment(source, @model.attributes.mimetype)
 		onClose: ->
 			@$el.off()
 
+		displayTag: ->
+			$(".crown-tag").toggle()
+			$('.crown-attach').hide()
+			$(".crown-emoticon").hide()
 		displayAttach: ->
-			$(".crown-attach").toggle()
+			$(".crown-tag").hide()
+			$('.crown-attach').toggle()
+			$(".crown-emoticon").hide()
 			if @model.attributes.attach_size>1 then $(".attach-btn").text("Change File")
-			@createDropTarget()  # move to initialize
+			if @noDropTarget then @createDropTarget()
 		displayEmoticon: ->
-			# App.Note.eventManager.trigger "concealLeaf"
+			$(".crown-tag").hide()
+			$('.crown-attach').hide()
 			$(".crown-emoticon").toggle()
 
 		addTag: ->
@@ -71,13 +79,14 @@
 			console.log "emoticon should be selected"
 
 		createDropTarget: ->
+			@noDropTarget = false
 			filepicker.makeDropPane $(".attach-drop")[0],
 				extensions: [
 					".pdf", ".ppt", ".pptx", ".doc", ".docx", ".png", ".gif", ".jpg"
 				]
 				maxSize: 5242880 # 5MB
 				dragEnter: =>
-					@ui.attach.addClass("over") # make something turn yellow
+					@ui.attach.addClass("over")
 				dragLeave: =>
 					@ui.attach.removeClass("over")
 				onProgress: (percentage) =>

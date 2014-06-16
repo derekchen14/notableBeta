@@ -57,7 +57,10 @@
 					color: rgb(51, 51, 51);
 					font-size: 12px;
 					padding: 4px 7px;
-					&.over { border: 1px solid $grayDark; }
+					&.over {
+						border: 1px solid $grayDark;
+						background-color: $notableYellow;
+					}
 				}
 				.attach-btn {
 					color: $white;
@@ -66,6 +69,9 @@
 					border-radius: 3px;
 					padding: 3px 6px;
 				}
+			}
+			.crown-emoticon {
+				.glyphicon-heart { color: $notableRed; }
 			}
 		}
 	}
