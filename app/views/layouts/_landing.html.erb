@@ -11,23 +11,16 @@
 	<p class="pitch">Notable is a note-taking app for learning more efficiently and effectively. It allows users to easily organize and play with their ideas, leading to more connections, deeper understanding, and that moment when everything just makes sense.</p>
 
 	<div class="message">
-		Notable is currently invite only. Would you like one?
+		Notable is now in public beta. Sign up today!
 	</div>
 
-<!-- Mailchimp Signup Form -->
+
 <div id="mc_embed_signup">
-	<form action="http://notable.us3.list-manage.com/subscribe/post?u=794b28891835b425ac5058300&amp;id=0d6d587bb5" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-	<div class="mc-field-group">
-		<input type="email" value="" placeholder="Enter your email address" name="EMAIL" class="required email" id="mce-EMAIL">
-	</div>
-	<div id="mce-responses" class="clear">
-		<div class="response" id="mce-error-response" style="display:none"></div>
-		<div class="response" id="mce-success-response" style="display:none"></div>
-	</div>
-	<div class="clear">
-		<input type="submit" value="Submit" name="subscribe" id="mc-embedded-subscribe" class="submit btn" onsubmit="mixpanel.track('Request Invite');">
-	</div>
-	</form>
+	<%= form_tag(new_user_registration_path, method: "get") do %>
+		<div class="mc-field-group"><%= text_field_tag(:email, nil,
+			placeholder: "Enter your email address", class: "email") %></div>
+		<%= submit_tag("Submit", class: "submit btn clear") %>
+	<% end %>
 </div>
 
 <%= render 'scaffold/footer_out' %>
